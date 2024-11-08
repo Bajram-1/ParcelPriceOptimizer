@@ -1,6 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ParcelPriceOptimizer.DAL.IRepositories;
+using ParcelPriceOptimizer.DAL.Repositories;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -17,6 +19,12 @@ namespace ParcelPriceOptimizer.DAL
             {
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
+
+            services.AddScoped<ICourierRepository, CourierRepository>();
+            services.AddScoped<ICourierPricingRuleRepository, CourierPricingRuleRepository>();
+            services.AddScoped<ICustomerInputRepository, CustomerInputRepository>();
+            services.AddScoped<IParcelRepository, ParcelRepository>();
+            services.AddScoped<IShippingQuoteRepository, ShippingQuoteRepository>();
         }
     }
 }
