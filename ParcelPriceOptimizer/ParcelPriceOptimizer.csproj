@@ -16,7 +16,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\BLL\ParcelPriceOptimizer.BLL.csproj" />
     <ProjectReference Include="..\ParcelPriceOptimizer.BLL\ParcelPriceOptimizer.BLL.csproj" />
     <ProjectReference Include="..\ParcelPriceOptimizer.DAL\ParcelPriceOptimizer.DAL.csproj" />
   </ItemGroup>
