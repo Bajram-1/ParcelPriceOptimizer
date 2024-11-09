@@ -33,5 +33,12 @@ namespace ParcelPriceOptimizer.DAL.Repositories
         {
             return await _context.CourierPricingRules.FindAsync(id);
         }
+
+        public async Task<IEnumerable<CourierPricingRule>> GetByCourierIdAsync(int courierId)
+        {
+            return await _context.CourierPricingRules
+                .Where(r => r.CourierId == courierId)
+                .ToListAsync();
+        }
     }
 }

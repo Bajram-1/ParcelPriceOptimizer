@@ -7,5 +7,6 @@ namespace ParcelPriceOptimizer.DAL.IRepositories
         Task<IEnumerable<CourierPricingRule>> GetAllAsync();
         Task AddAsync(CourierPricingRule rule);
         Task<CourierPricingRule> GetByIdAsync(int id);
+        Task<IEnumerable<CourierPricingRule>> GetByCourierIdAsync(int courierId);
     }
 }

@@ -15,6 +15,11 @@ namespace ParcelPriceOptimizer.DAL.Entities
         public string CustomerName { get; set; }
         public string CustomerEmail { get; set; }
         public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
-
+        public decimal Width { get; set; }
+        public decimal Height { get; set; }
+        public decimal Depth { get; set; }
+        public decimal Volume => Width * Height * Depth;
+        public decimal Weight { get; set; }
+        public decimal Price { get; set; }
     }
 }
