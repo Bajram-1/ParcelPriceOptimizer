@@ -1,89 +1,92 @@
-﻿using ParcelPriceOptimizer.BLL.DTO.ViewModels;
+﻿using Microsoft.Extensions.DependencyInjection;
+using ParcelPriceOptimizer.BLL.DTO.ViewModels;
 using ParcelPriceOptimizer.BLL.IServices;
+using ParcelPriceOptimizer.DAL;
 using ParcelPriceOptimizer.DAL.IRepositories;
 using ParcelPriceOptimizer.DAL.Repositories;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ParcelPriceOptimizer.BLL.Services
 {
     public class CourierPricingService : ICourierPricingService
     {
-        private readonly ICourierPricingRuleRepository _courierPricingRuleRepository;
-        private readonly ICourierRepository _courierRepository;
-        private readonly IParcelRepository _parcelRepository;
+        private readonly IServiceProvider _serviceProvider;
 
-        public CourierPricingService(ICourierPricingRuleRepository courierPricingRuleRepository, ICourierRepository courierRepository, IParcelRepository parcelRepository)
+        public CourierPricingService(IServiceProvider serviceProvider)
         {
-            _courierPricingRuleRepository = courierPricingRuleRepository;
-            _courierRepository = courierRepository;
-            _parcelRepository = parcelRepository;
+            _serviceProvider = serviceProvider;
         }
 
         public async Task<decimal> GetPriceRulingAsync(int courierId, PackageInputViewModel input)
         {
-            var pricingRules = await _courierPricingRuleRepository.GetByCourierIdAsync(courierId);
-
-            if (pricingRules == null || !pricingRules.Any())
+            using (var scope = _serviceProvider.CreateScope())
             {
-                throw new Exception("No pricing rules found for the specified courier.");
-            }
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                var pricingRuleRepository = new CourierPricingRuleRepository(context);
+                var pricingRules = await pricingRuleRepository.GetByCourierIdAsync(courierId);
 
-            decimal packageVolume = input.Width * input.Height * input.Depth;
-
-            decimal maxDimensionPrice = 0;
-            decimal maxWeightPrice = 0;
-
-            foreach (var rule in pricingRules)
-            {
-                if (packageVolume >= rule.MinVolume && packageVolume <= rule.MaxVolume)
+                if (pricingRules == null || !pricingRules.Any())
                 {
-                    maxDimensionPrice = Math.Max(maxDimensionPrice, rule.DimensionPrice);
+                    throw new Exception("No pricing rules found for the specified courier.");
                 }
 
-                if (input.Weight >= rule.MinWeight && input.Weight <= rule.MaxWeight)
+                decimal packageVolume = input.Width * input.Height * input.Depth;
+                decimal maxDimensionPrice = 0; decimal maxWeightPrice = 0;
+
+                foreach (var rule in pricingRules)
                 {
-                    maxWeightPrice = Math.Max(maxWeightPrice, rule.WeightPrice);
+                    if (packageVolume >= rule.MinVolume && packageVolume <= rule.MaxVolume)
+                    {
+                        maxDimensionPrice = Math.Max(maxDimensionPrice, rule.DimensionPrice);
+                    }
+                    if (input.Weight >= rule.MinWeight && input.Weight <= rule.MaxWeight)
+                    {
+                        maxWeightPrice = Math.Max(maxWeightPrice, rule.WeightPrice);
+                    }
                 }
-            }
 
-            decimal finalPrice = Math.Max(maxDimensionPrice, maxWeightPrice);
+                decimal finalPrice = Math.Max(maxDimensionPrice, maxWeightPrice);
 
-            if (finalPrice == 0)
-            {
-                throw new Exception("No valid pricing rule found for the given package dimensions and weight.");
+                if (finalPrice == 0)
+                {
+                    throw new Exception("No valid pricing rule found for the given package dimensions and weight.");
+                }
+                return finalPrice;
             }
-            return finalPrice;
         }
         public async Task<decimal> CalculateOptimalShippingPriceAsync(PackageInputViewModel input)
         {
-            var couriers = await _courierRepository.GetAllAsync();
-
-            var priceTasks = couriers.Select(async courier =>
+            using (var scope = _serviceProvider.CreateScope())
             {
+                var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+
+                var courierRepository = new CourierRepository(context);
+                var couriers = await courierRepository.GetAllAsync();
+                var priceTasks = new List<Task<decimal>>();
+
+                foreach (var courier in couriers)
+                {
+                    priceTasks.Add(GetPriceRulingAsync(courier.Id, input));
+                }
+
+                decimal[] prices;
+
                 try
                 {
-                    return await GetPriceRulingAsync(courier.Id, input);
+                    prices = await Task.WhenAll(priceTasks);
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
-                    return decimal.MaxValue;
+                    prices = new decimal[] { decimal.MaxValue };
                 }
-            });
 
-            var prices = await Task.WhenAll(priceTasks);
+                var bestPrice = prices.Min();
 
-            var bestPrice = prices.Min();
-
-            if (bestPrice == decimal.MaxValue)
-            {
-                throw new Exception("No suitable pricing found for the input package.");
+                if (bestPrice == decimal.MaxValue)
+                {
+                    throw new Exception("No suitable pricing found for the input package.");
+                }
+                return bestPrice;
             }
-
-            return bestPrice;
         }
     }
 }
