@@ -17,19 +17,16 @@ namespace ParcelPriceOptimizer.Controllers
             _priceCalculationService = priceCalculationService;
         }
 
-        [HttpPost("save")]
-        public async Task<IActionResult> SaveCustomerInput([FromBody] PackageInputViewModel input)
-        {
-            if (input == null)
-            {
-                return BadRequest("Invalid package input.");
-            }
-
-            decimal calculatedPrice = _priceCalculationService.CalculatePrice(input);
-
-            await _customerInputService.SaveCustomerInputAsync(input, calculatedPrice);
-
-            return Ok("Customer input saved successfully.");
+        [HttpPost("save")] 
+        public async Task<IActionResult> SaveCustomerInput([FromBody] PackageInputViewModel input) 
+        { 
+            if (input == null) 
+            { 
+                return BadRequest("Invalid package input."); 
+            } 
+            decimal calculatedPrice = await _priceCalculationService.CalculatePriceAsync(input); 
+            await _customerInputService.SaveCustomerInputAsync(input, calculatedPrice); 
+            return Ok("Customer input saved successfully."); 
         }
     }
 }
