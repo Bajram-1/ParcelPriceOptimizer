@@ -1,7 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'; 
 import HomeView from '../components/Home.vue'; 
 import ParcelPriceCalculator from '../components/ParcelPriceCalculator.vue'; 
-import OptimalPriceCalculator from '../components/OptimalPriceCalculator.vue'; 
 import UserLogin from '../components/UserLogin.vue'; 
 import UserRegister from '../components/UserRegister.vue'; 
 import store from '../store'; const routes = [ 
@@ -14,12 +13,7 @@ import store from '../store'; const routes = [
       path: '/calculate-parcel-price', 
       name: 'ParcelPriceCalculator', 
       component: ParcelPriceCalculator 
-   }, 
-   { 
-      path: '/calculate-optimal-price', 
-      name: 'OptimalPriceCalculator', 
-      component: OptimalPriceCalculator 
-   }, 
+   },
    { 
       path: '/login', 
       name: 'UserLogin', 

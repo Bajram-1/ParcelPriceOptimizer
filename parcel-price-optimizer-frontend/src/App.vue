@@ -3,7 +3,6 @@
     <nav class="navbar navbar-expand-lg navbar-light bg-white mb-4 shadow-sm"> 
       <div class="container"> 
         <router-link to="/" class="navbar-brand">Home</router-link> 
-        <router-link v-if="isAuthenticated" to="/calculate-optimal-price" class="nav-link">Calculate Optimal Price</router-link> 
         <router-link v-if="isAuthenticated" to="/calculate-parcel-price" class="nav-link">Calculate Parcel Price</router-link> 
         <router-link v-if="!isAuthenticated" to="/login" class="nav-link">Login</router-link> 
         <router-link v-if="!isAuthenticated" to="/register" class="nav-link">Register</router-link> 
