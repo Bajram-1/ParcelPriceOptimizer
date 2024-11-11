@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace ParcelPriceOptimizer.DAL.Migrations
 {
     /// <inheritdoc />
-    public partial class AddedProjectEntitiesInDb : Migration
+    public partial class PackageShippingOptimizer : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,6 +32,7 @@ namespace ParcelPriceOptimizer.DAL.Migrations
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     Discriminator = table.Column<string>(type: "nvarchar(21)", maxLength: 21, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    LastName = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     StreetAddress = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     City = table.Column<string>(type: "nvarchar(max)", nullable: true),
                     State = table.Column<string>(type: "nvarchar(max)", nullable: true),
@@ -59,21 +60,20 @@ namespace ParcelPriceOptimizer.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Parcel",
+                name: "Couriers",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Width = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Height = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Depth = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Weight = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    MinWeight = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MaxWeight = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MinVolume = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MaxVolume = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Parcel", x => x.Id);
+                    table.PrimaryKey("PK_Couriers", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -183,32 +183,74 @@ namespace ParcelPriceOptimizer.DAL.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "CustomerInput",
+                name: "CustomerInputs",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ParcelId = table.Column<int>(type: "int", nullable: false),
-                    UserId = table.Column<int>(type: "int", nullable: false),
-                    UserId1 = table.Column<string>(type: "nvarchar(450)", nullable: true),
-                    CustomerName = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    CustomerEmail = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Width = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Height = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Depth = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Weight = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    Price = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
                     SubmittedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_CustomerInput", x => x.Id);
+                    table.PrimaryKey("PK_CustomerInputs", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_CustomerInput_AspNetUsers_UserId1",
-                        column: x => x.UserId1,
+                        name: "FK_CustomerInputs_AspNetUsers_UserId",
+                        column: x => x.UserId,
                         principalTable: "AspNetUsers",
-                        principalColumn: "Id");
-                    table.ForeignKey(
-                        name: "FK_CustomerInput_Parcel_ParcelId",
-                        column: x => x.ParcelId,
-                        principalTable: "Parcel",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "CourierPricingRules",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CourierId = table.Column<int>(type: "int", nullable: false),
+                    MinVolume = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MaxVolume = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    DimensionPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MinWeight = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    MaxWeight = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    WeightPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_CourierPricingRules", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_CourierPricingRules_Couriers_CourierId",
+                        column: x => x.CourierId,
+                        principalTable: "Couriers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "ShippingQuotes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    CourierId = table.Column<int>(type: "int", nullable: false),
+                    CalculatedPrice = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
+                    QuotedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ShippingQuotes", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_ShippingQuotes_Couriers_CourierId",
+                        column: x => x.CourierId,
+                        principalTable: "Couriers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
@@ -251,14 +293,19 @@ namespace ParcelPriceOptimizer.DAL.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CustomerInput_ParcelId",
-                table: "CustomerInput",
-                column: "ParcelId");
+                name: "IX_CourierPricingRules_CourierId",
+                table: "CourierPricingRules",
+                column: "CourierId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_CustomerInput_UserId1",
-                table: "CustomerInput",
-                column: "UserId1");
+                name: "IX_CustomerInputs_UserId",
+                table: "CustomerInputs",
+                column: "UserId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_ShippingQuotes_CourierId",
+                table: "ShippingQuotes",
+                column: "CourierId");
         }
 
         /// <inheritdoc />
@@ -280,7 +327,13 @@ namespace ParcelPriceOptimizer.DAL.Migrations
                 name: "AspNetUserTokens");
 
             migrationBuilder.DropTable(
-                name: "CustomerInput");
+                name: "CourierPricingRules");
+
+            migrationBuilder.DropTable(
+                name: "CustomerInputs");
+
+            migrationBuilder.DropTable(
+                name: "ShippingQuotes");
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
@@ -289,7 +342,7 @@ namespace ParcelPriceOptimizer.DAL.Migrations
                 name: "AspNetUsers");
 
             migrationBuilder.DropTable(
-                name: "Parcel");
+                name: "Couriers");
         }
     }
 }

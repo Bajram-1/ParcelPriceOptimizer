@@ -12,8 +12,8 @@ using ParcelPriceOptimizer.DAL;
 namespace ParcelPriceOptimizer.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20241108213445_AddedDepthPropertyinCustomerInput")]
-    partial class AddedDepthPropertyinCustomerInput
+    [Migration("20241111085453_UpdateCustomerInputForeignKey")]
+    partial class UpdateCustomerInputForeignKey
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -305,22 +305,11 @@ namespace ParcelPriceOptimizer.DAL.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CustomerEmail")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("CustomerName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<decimal>("Depth")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<decimal>("Height")
                         .HasColumnType("decimal(18,2)");
-
-                    b.Property<int>("ParcelId")
-                        .HasColumnType("int");
 
                     b.Property<decimal>("Price")
                         .HasColumnType("decimal(18,2)");
@@ -345,43 +334,6 @@ namespace ParcelPriceOptimizer.DAL.Migrations
                     b.ToTable("CustomerInputs");
                 });
 
-            modelBuilder.Entity("ParcelPriceOptimizer.DAL.Entities.Parcel", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("CustomerInputId")
-                        .HasColumnType("int");
-
-                    b.Property<decimal>("Depth")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Height")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Price")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Weight")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.Property<decimal>("Width")
-                        .HasColumnType("decimal(18,2)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CustomerInputId")
-                        .IsUnique();
-
-                    b.ToTable("Parcels");
-                });
-
             modelBuilder.Entity("ParcelPriceOptimizer.DAL.Entities.ShippingQuote", b =>
                 {
                     b.Property<int>("Id")
@@ -396,17 +348,12 @@ namespace ParcelPriceOptimizer.DAL.Migrations
                     b.Property<int>("CourierId")
                         .HasColumnType("int");
 
-                    b.Property<int>("ParcelId")
-                        .HasColumnType("int");
-
                     b.Property<DateTime>("QuotedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("CourierId");
-
-                    b.HasIndex("ParcelId");
 
                     b.ToTable("ShippingQuotes");
                 });
@@ -421,6 +368,10 @@ namespace ParcelPriceOptimizer.DAL.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<string>("LastName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -512,21 +463,10 @@ namespace ParcelPriceOptimizer.DAL.Migrations
                     b.HasOne("ParcelPriceOptimizer.DAL.Entities.ApplicationUser", "User")
                         .WithMany("CustomerInputs")
                         .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("ParcelPriceOptimizer.DAL.Entities.Parcel", b =>
-                {
-                    b.HasOne("ParcelPriceOptimizer.DAL.Entities.CustomerInput", "CustomerInput")
-                        .WithOne("Parcel")
-                        .HasForeignKey("ParcelPriceOptimizer.DAL.Entities.Parcel", "CustomerInputId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("CustomerInput");
                 });
 
             modelBuilder.Entity("ParcelPriceOptimizer.DAL.Entities.ShippingQuote", b =>
@@ -537,32 +477,13 @@ namespace ParcelPriceOptimizer.DAL.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("ParcelPriceOptimizer.DAL.Entities.Parcel", "Parcel")
-                        .WithMany("ShippingQuotes")
-                        .HasForeignKey("ParcelId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.Navigation("Courier");
-
-                    b.Navigation("Parcel");
                 });
 
             modelBuilder.Entity("ParcelPriceOptimizer.DAL.Entities.Courier", b =>
                 {
                     b.Navigation("CourierPricingRules");
 
-                    b.Navigation("ShippingQuotes");
-                });
-
-            modelBuilder.Entity("ParcelPriceOptimizer.DAL.Entities.CustomerInput", b =>
-                {
-                    b.Navigation("Parcel")
-                        .IsRequired();
-                });
-
-            modelBuilder.Entity("ParcelPriceOptimizer.DAL.Entities.Parcel", b =>
-                {
                     b.Navigation("ShippingQuotes");
                 });
 
