@@ -18,16 +18,8 @@
         <div class="mb-3"> 
             <label for="weight" class="form-label">Weight (kg):</label> 
             <input type="number" v-model="weight" class="form-control" required /> 
-        </div> 
-        <div class="mb-3"> 
-            <label for="customerName" class="form-label">Customer Name:</label> 
-            <input type="text" v-model="customerName" class="form-control" required /> 
-        </div> 
-        <div class="mb-3"> 
-            <label for="customerEmail" class="form-label">Customer Email:</label> 
-            <input type="email" v-model="customerEmail" class="form-control" required /> 
-        </div> 
-        
+        </div>
+        <input type="hidden" v-model="userId" /> 
         <button type="submit" class="btn btn-success w-100">Calculate Price</button> 
     </form> 
     <div v-if="price !== null" class="mt-4 text-center"> 
@@ -39,41 +31,96 @@
 <script> 
     import axios from 'axios'; 
     
-    export default { name: 'ParcelPriceCalculator', data() { return { 
-        width: null, 
-        height: null, 
-        depth: null, 
-        weight: null, 
-        customerName: '', 
-        customerEmail: '', 
-        price: null }; 
-    }, 
-    methods: { async calculatePrice() { try { 
-        const response = await axios.post('https://localhost:7084/api/parcel/calculate', { 
-            width: this.width, 
-            height: this.height, 
-            depth: this.depth, 
-            weight: this.weight, 
-            customerName: this.customerName, 
-            customerEmail: this.customerEmail }); 
-            this.price = response.data.price; 
-            
-            await axios.post('https://localhost:7084/api/customerinput/save', { 
-                width: this.width, 
-                height: this.height, 
-                depth: this.depth, 
-                weight: this.weight, 
-                customerName: this.customerName, 
-                customerEmail: this.customerEmail, 
-                price: this.price 
-            });
-        
-        } catch (error) { 
-            console.error('Error calculating price:', error); 
-            } 
-        } 
-    } 
-}; 
+    export default 
+    { 
+        name: 'ParcelPriceCalculator', 
+        data() 
+        { 
+            return { 
+                width: null, 
+                height: null, 
+                depth: null, 
+                weight: null, 
+                price: null, 
+                userId: null, 
+            }; 
+        }, 
+        mounted() 
+        {
+            const token = localStorage.getItem('token');
+            if (token) {
+                const decodedToken = JSON.parse(atob(token.split('.')[1]));
+                this.userId = decodedToken.sub;
+                console.log('UserId fetched from token:', this.userId);
+            } else {
+                console.error('No token found in localStorage');
+            }
+        },
+        methods: 
+        { 
+            async calculatePrice() 
+            { 
+                try 
+                { 
+                    console.log("Sending request to calculate price with data:", 
+                    { 
+                        width: this.width, 
+                        height: this.height, 
+                        depth: this.depth, 
+                        weight: this.weight, 
+                        userId: this.userId, 
+                    }); 
+                    if (!this.width || !this.height || !this.depth || !this.weight || !this.userId) 
+                    { 
+                        console.error('Invalid input data:', 
+                        { 
+                            width: this.width, 
+                            height: this.height, 
+                            depth: this.depth, 
+                            weight: this.weight, 
+                            userId: this.userId, 
+                        }); 
+                        return; 
+                    } 
+                    const response = await axios.post('https://localhost:7084/api/parcel/calculate', 
+                    { 
+                        width: this.width, 
+                        height: this.height, 
+                        depth: this.depth, 
+                        weight: this.weight, 
+                        userId: this.userId, 
+                    }); 
+                    console.log("Response received:", response); 
+                    if (response && response.data) 
+                    { 
+                        this.price = response.data.price; 
+                        console.log("Price calculated successfully:", this.price); 
+                    } 
+                    else 
+                    { 
+                        console.error('Error: Calculate price response data is undefined'); 
+                    } 
+                } 
+                catch (error) 
+                { 
+                    if (error.response) 
+                    { 
+                        console.error('Error response data:', error.response.data); 
+                        console.error('Error response status:', error.response.status); 
+                        console.error('Error response headers:', error.response.headers); 
+                    } 
+                    else if (error.request) 
+                    { 
+                        console.error('Error request data:', error.request); 
+                    } 
+                    else 
+                    { 
+                        console.error('Error message:', error.message); 
+                    } 
+                } 
+            }, 
+        }, 
+    }; 
 </script>
 
 <style scoped> 
