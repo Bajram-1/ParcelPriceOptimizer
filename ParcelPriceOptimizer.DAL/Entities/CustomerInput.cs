@@ -16,6 +16,6 @@ namespace ParcelPriceOptimizer.DAL.Entities
         public decimal Volume => Width * Height * Depth;
         public decimal Weight { get; set; }
         public decimal Price { get; set; }
-        public DateTime SubmittedAt { get; set; } = DateTime.UtcNow;
+        public DateTime SubmittedAt { get; set; } = DateTime.Now;
     }
 }

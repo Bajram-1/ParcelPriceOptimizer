@@ -11,6 +11,6 @@ namespace ParcelPriceOptimizer.DAL.Entities
         public int CourierId { get; set; }
         public Courier Courier { get; set; }
         public decimal CalculatedPrice { get; set; }
-        public DateTime QuotedAt { get; set; } = DateTime.UtcNow;
+        public DateTime QuotedAt { get; set; } = DateTime.Now;
     }
 }

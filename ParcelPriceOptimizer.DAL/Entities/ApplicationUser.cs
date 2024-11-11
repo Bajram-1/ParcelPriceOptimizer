@@ -11,7 +11,7 @@ namespace ParcelPriceOptimizer.DAL.Entities
         public string State { get; set; }
         public string PostalCode { get; set; }
         public string Role { get; set; }
-        public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+        public DateTime CreatedAt { get; set; } = DateTime.Now;
         public ICollection<CustomerInput> CustomerInputs { get; set; }
     }
 }
