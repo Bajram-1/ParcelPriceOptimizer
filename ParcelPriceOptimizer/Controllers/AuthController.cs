@@ -56,7 +56,7 @@ namespace ParcelPriceOptimizer.Controllers
         {
             var claims = new List<Claim>
         {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
             new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
             new Claim(ClaimTypes.NameIdentifier, user.Id)
         };
@@ -107,7 +107,6 @@ namespace ParcelPriceOptimizer.Controllers
                 return BadRequest("The user ID is invalid.");
             }
 
-            // Decode the token
             var decodedCodeBytes = WebEncoders.Base64UrlDecode(code);
             var decodedCode = Encoding.UTF8.GetString(decodedCodeBytes);
             var result = await _userManager.ConfirmEmailAsync(user, decodedCode);
