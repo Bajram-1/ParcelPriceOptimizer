@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using ParcelPriceOptimizer.DAL.Entities;
 using ParcelPriceOptimizer.DAL.IRepositories;
 using System;
@@ -12,42 +13,28 @@ namespace ParcelPriceOptimizer.DAL.Repositories
     public class CustomerInputRepository : ICustomerInputRepository
     {
         private readonly ApplicationDbContext _context;
+        private readonly ILogger<CustomerInputRepository> _logger;
 
-        public CustomerInputRepository(ApplicationDbContext context)
+        public CustomerInputRepository(ApplicationDbContext context, ILogger<CustomerInputRepository> logger)
         {
             _context = context;
+            _logger = logger;
         }
 
-        public async Task<IEnumerable<CustomerInput>> GetAllAsync()
-        {
-            return await _context.CustomerInputs.Include(ci => ci.Parcel)
-                                                .Include(ci => ci.User)
-                                                .ToListAsync();
-        }
-        public async Task<CustomerInput> GetByIdAsync(int id)
-        {
-            return await _context.CustomerInputs.Include(ci => ci.Parcel)
-                                                .Include(ci => ci.User)
-                                                .FirstOrDefaultAsync(ci => ci.Id == id);
-        }
-        public async Task AddAsync(CustomerInput customerInput)
-        {
-            await _context.CustomerInputs.AddAsync(customerInput);
-            await _context.SaveChangesAsync();
-        }
-        public async Task UpdateAsync(CustomerInput customerInput)
-        {
-            _context.CustomerInputs.Update(customerInput);
-            await _context.SaveChangesAsync();
-        }
-        public async Task DeleteAsync(int id)
-        {
-            var customerInput = await _context.CustomerInputs.FindAsync(id);
-            if (customerInput != null)
-            {
-                _context.CustomerInputs.Remove(customerInput); 
-                await _context.SaveChangesAsync();
-            }
+        public async Task AddAsync(CustomerInput customerInput) 
+        {  
+            await _context.CustomerInputs.AddAsync(customerInput); 
+            
+            try 
+            { 
+                await _context.SaveChangesAsync(); 
+                _logger.LogInformation("CustomerInput saved successfully."); 
+            } 
+            catch (Exception ex) 
+            { 
+                _logger.LogError(ex, "Error saving CustomerInput. UserId={UserId}", customerInput.UserId); 
+                throw; 
+            } 
         }
     }
 }
