@@ -8,11 +8,11 @@ namespace ParcelPriceOptimizer.BLL
     {
         public static void RegisterBLLServices(this IServiceCollection services)
         {
-            services.AddScoped<ICourierPricingService, CourierPricingService>();
             services.AddScoped<ICourierValidationService, CourierValidationService>();
             services.AddScoped<ICustomerInputService, CustomerInputService>();
             services.AddScoped<IPriceCalculationService, PriceCalculationService>();
             services.AddScoped<IShippingCostService, ShippingCostService>();
+            services.AddScoped<IUserService, UserService>();
         }
     }
 }
