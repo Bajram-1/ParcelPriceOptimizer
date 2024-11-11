@@ -17,9 +17,9 @@ namespace ParcelPriceOptimizer.BLL.Services
             _priceCalculationService = priceCalculationService;
         }
 
-        public async Task<decimal> GetShippingCostAsync(PackageInputViewModel input)
-        {
-            return await Task.Run(() => _priceCalculationService.CalculatePrice(input));
+        public async Task<decimal> GetShippingCostAsync(PackageInputViewModel input) 
+        { 
+            return await _priceCalculationService.CalculatePriceAsync(input); 
         }
 
         public async Task<IEnumerable<decimal>> GetAllShippingCostsAsync(IEnumerable<PackageInputViewModel> inputs)
