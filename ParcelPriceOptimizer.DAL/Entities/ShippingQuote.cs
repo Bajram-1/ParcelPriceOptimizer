@@ -8,8 +8,6 @@ namespace ParcelPriceOptimizer.DAL.Entities
 {
     public class ShippingQuote : BaseEntityWithKey
     {
-        public int ParcelId { get; set; }
-        public Parcel Parcel { get; set; }
         public int CourierId { get; set; }
         public Courier Courier { get; set; }
         public decimal CalculatedPrice { get; set; }
