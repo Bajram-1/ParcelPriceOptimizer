@@ -19,14 +19,14 @@ namespace ParcelPriceOptimizer.BLL.Services
             _customerInputService = customerInputService;
         }
 
-        public decimal CalculatePrice(PackageInputViewModel input)
+        public async Task<decimal> CalculatePriceAsync(PackageInputViewModel input)
         {
             decimal dimensionPrice = GetDimensionPrice(input);
             decimal weightPrice = GetWeightPrice(input);
+            decimal finalPrice = Math.Max(dimensionPrice, weightPrice);
 
-            //_customerInputService.SaveCustomerInputAsync(input, Math.Max(dimensionPrice, weightPrice));
-
-            return Math.Max(dimensionPrice, weightPrice);
+            await _customerInputService.SaveCustomerInputAsync(input, finalPrice);
+            return finalPrice;
         }
 
         private decimal GetDimensionPrice(PackageInputViewModel input)
@@ -75,14 +75,13 @@ namespace ParcelPriceOptimizer.BLL.Services
             return 0;
         }
 
-        public decimal GetPriceRuling(int courierId, PackageInputViewModel input)
+        public async Task<decimal> GetPriceRulingAsync(int courierId, PackageInputViewModel input)
         {
             if (courierId < 1 || courierId > 3)
             {
                 throw new Exception("Invalid courier ID.");
             }
-
-            return CalculatePrice(input);
+            return await CalculatePriceAsync(input);
         }
     }
 }

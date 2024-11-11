@@ -4,7 +4,7 @@ namespace ParcelPriceOptimizer.BLL.IServices
 {
     public interface IPriceCalculationService
     {
-        decimal CalculatePrice(PackageInputViewModel input);
-        decimal GetPriceRuling(int courierId, PackageInputViewModel input);
+        Task<decimal> CalculatePriceAsync(PackageInputViewModel input);
+        Task<decimal> GetPriceRulingAsync(int courierId, PackageInputViewModel input);
     }
 }
