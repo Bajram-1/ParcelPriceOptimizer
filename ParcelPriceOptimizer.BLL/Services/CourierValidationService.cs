@@ -6,13 +6,6 @@ namespace ParcelPriceOptimizer.BLL.Services
 {
     public class CourierValidationService : ICourierValidationService
     {
-        private ICourierRepository _courierRepository;
-
-        public CourierValidationService(ICourierRepository courierRepository)
-        {
-            _courierRepository = courierRepository;
-        }
-
         public bool IsValidForCompany1(PackageInputViewModel input)
         {
             return input.Weight <= 20 && input.Weight > 0 && input.Volume <= 2000;
