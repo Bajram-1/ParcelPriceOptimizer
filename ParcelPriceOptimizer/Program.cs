@@ -9,6 +9,8 @@ using System.Text;
 using ParcelPriceOptimizer.DAL.DbInitializer;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using ParcelPriceOptimizer.Common;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args); 
 
@@ -34,9 +36,9 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options => {
 
 builder.Services.RegisterBLLServices(); 
 builder.Services.RegisterDALServices(builder.Configuration);
+builder.Services.AddLogging();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
 
-// Configure JWT authentication
 var jwtIssuer = builder.Configuration["JwtSettings:Issuer"]; 
 var jwtAudience = builder.Configuration["JwtSettings:Audience"]; 
 var jwtKey = builder.Configuration["JwtSettings:Secret"]; 
@@ -75,10 +77,51 @@ builder.Services.AddAuthentication(options => {
             return Task.CompletedTask; 
         } 
     }; 
-}); 
+});
+
+builder.Services.AddSwaggerGen(c =>
+{
+    c.SwaggerDoc("v1", new OpenApiInfo { Title = "Parcel Menagement Order", Version = "v1" });
+
+    var securityScheme = new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+    };
+
+    c.AddSecurityDefinition("Bearer", securityScheme);
+
+    var securityRequirement = new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    };
+
+    c.AddSecurityRequirement(securityRequirement);
+});
+
+builder.Services.AddCors(options => 
+{ 
+    options.AddPolicy("AllowAllOrigins", builder => 
+    { 
+        builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader(); 
+    }); 
+});
 
 builder.Services.AddControllers(); 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddCors(options => { 
     options.AddPolicy("AllowFrontend", policy => { 
         policy.WithOrigins("http://localhost:8080").AllowAnyHeader().AllowAnyMethod(); 
@@ -90,13 +133,16 @@ builder.Services.AddSwaggerGen();
 var app = builder.Build(); 
 await SeedDatabaseAsync(); 
 
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment()) { 
-    app.UseSwagger(); 
-    app.UseSwaggerUI(); 
+if (app.Environment.IsDevelopment()) 
+{ 
+    app.UseSwagger();
+    app.UseSwaggerUI(c => {
+        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Parcel Menagement Order"); 
+      }); 
 } 
 app.UseHttpsRedirection(); 
-app.UseCors("AllowFrontend"); 
+app.UseCors("AllowFrontend");
+app.UseCors("AllowAllOrigins");
 app.UseRouting(); 
 app.UseAuthentication(); 
 app.UseAuthorization(); 
