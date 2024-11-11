@@ -5,6 +5,6 @@ namespace ParcelPriceOptimizer.BLL.IServices
 {
     public interface ICustomerInputService
     {
-        Task SaveCustomerInputAsync(PackageInputViewModel input, decimal price);
+        Task SaveCustomerInputAsync(CustomerInputViewModel input, decimal price);
     }
 }

@@ -25,7 +25,7 @@ namespace ParcelPriceOptimizer.Controllers
         }
 
         [HttpPost("calculate")] 
-        public async Task<IActionResult> CalculatePrice([FromBody] PackageInputViewModel input) 
+        public async Task<IActionResult> CalculatePrice([FromBody] CustomerInputViewModel input) 
         { 
             if (!ModelState.IsValid) 
             { 
@@ -41,14 +41,12 @@ namespace ParcelPriceOptimizer.Controllers
                 return Unauthorized("User not logged in."); 
             } 
             
-            _logger.LogInformation("Fetched User ID: {UserId}", userId); 
-            
             input.UserId = userId; 
-            _logger.LogInformation("Calculating price for user ID: {UserId}", userId); 
             
             try 
             { 
-                decimal price = await _priceCalculationService.CalculatePriceAsync(input); 
+                decimal price = _priceCalculationService.CalculatePrice(input);
+                await _customerInputService.SaveCustomerInputAsync(input, price);
                 _logger.LogInformation("Price calculated successfully: {Price}", price); 
                 return Ok(new { price }); 
             } 

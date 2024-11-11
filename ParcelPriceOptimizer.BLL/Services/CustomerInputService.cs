@@ -29,7 +29,7 @@ namespace ParcelPriceOptimizer.BLL.Services
             _userRepository = userRepository;
         }
 
-        public async Task SaveCustomerInputAsync(PackageInputViewModel input, decimal price)
+        public async Task SaveCustomerInputAsync(CustomerInputViewModel input, decimal price)
         {
             var userId = _userService.GetCurrentUserId();
 
@@ -53,7 +53,7 @@ namespace ParcelPriceOptimizer.BLL.Services
                 Depth = input.Depth,
                 Weight = input.Weight,
                 Price = price,
-                SubmittedAt = DateTime.UtcNow
+                SubmittedAt = DateTime.Now
             };
 
             await _repository.AddAsync(customerInput);

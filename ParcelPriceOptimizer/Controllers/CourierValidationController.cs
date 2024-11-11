@@ -16,7 +16,7 @@ namespace ParcelPriceOptimizer.Controllers
         }
 
         [HttpPost("validforcompany1")]
-        public IActionResult ValidateForCompany1([FromBody] PackageInputViewModel input)
+        public IActionResult ValidateForCompany1([FromBody] CustomerInputViewModel input)
         {
             if (input == null)
             {
@@ -28,7 +28,7 @@ namespace ParcelPriceOptimizer.Controllers
         }
 
         [HttpPost("validforcompany2")]
-        public IActionResult ValidateForCompany2([FromBody] PackageInputViewModel input)
+        public IActionResult ValidateForCompany2([FromBody] CustomerInputViewModel input)
         {
             if (input == null)
             {
@@ -40,7 +40,7 @@ namespace ParcelPriceOptimizer.Controllers
         }
 
         [HttpPost("validforcompany3")]
-        public IActionResult ValidateForCompany3([FromBody] PackageInputViewModel input)
+        public IActionResult ValidateForCompany3([FromBody] CustomerInputViewModel input)
         {
             if (input == null)
             {
