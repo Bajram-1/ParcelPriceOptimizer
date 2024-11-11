@@ -5,13 +5,20 @@
                 <div class="form-group"> 
                     <label for="email">Email:</label> 
                     <input type="email" id="email" v-model="email" required /> 
+                    <span v-if="errors.Email" class="text-danger">{{ errors.Email }}</span>
                 </div> 
-                <div class="form-group"> 
+                <div class="form-group password-group"> 
                     <label for="password">Password:</label> 
-                    <input type="password" id="password" v-model="password" required /> 
-                </div> 
-                <button type="submit" class="btn btn-primary">Login</button> 
+                    <input :type="showPassword ? 'text' : 'password'" id="password" v-model="password" required /> 
+                    <span class="toggle-password" @click="togglePasswordVisibility"> 
+                        <i :class="showPassword ? 'fa fa-eye' : 'fa fa-eye-slash'"></i> 
+                    </span> 
+                    <span v-if="errors.Password" class="text-danger">{{ errors.Password }}</span>
+                </div>
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i> Login</button> 
             </form> 
+            <div v-if="message" class="alert alert-info">{{ message }}</div>
         </div> 
     </div> 
 </template>
@@ -26,30 +33,48 @@
     { 
         const email = ref(''); 
         const password = ref(''); 
+        const showPassword = ref(false);
+        const message = ref('');
+        const errors = ref({});
         const router = useRouter(); 
-        const login = async () => 
+        
+        const login = async () => {
+            try {
+                const response = await axios.post('https://localhost:7084/api/auth/login', {
+                    email: email.value,
+                    password: password.value
+                });
+
+                console.log('Response:', response);  // Log the whole response
+
+                if (response && response.data) {
+                    const token = response.data.token;
+                    localStorage.setItem('token', token);
+                    axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+                    store.commit('setToken', token); // Store token in Vuex
+                    console.log('Logged in successfully:', response.data); 
+                    router.push('/'); // Redirect to the home page
+                } else {
+                    console.error('No data in response');
+                }
+            } catch (error) {
+                console.error('Error logging in:', error);
+                if (error.response) {
+                    console.error('Response error:', error.response.data); // Server error response
+                } else if (error.request) {
+                    console.error('Request error:', error.request); // No response from server
+                } else {
+                    console.error('Unexpected error:', error.message); // Any other error
+                }
+            }
+        };
+
+        const togglePasswordVisibility = () => 
         { 
-            try 
-            { 
-                const response = await axios.post('https://localhost:7084/api/auth/login', 
-                { 
-                    email: email.value, 
-                    password: password.value 
-                }); 
-                
-                const token = response.data.token; 
-                localStorage.setItem('token', token); 
-                axios.defaults.headers.common['Authorization'] = `Bearer ${token}`; 
-                store.commit('setToken', token); // Store token in Vuex 
-                console.log('Logged in successfully:', response.data); // Redirect to the home page 
-                router.push('/'); 
-            }       
-            catch (error) 
-            { 
-                console.error('Error logging in:', error.response.data); 
-            } 
-        }; 
-        return { email, password, login }; 
+            showPassword.value = !showPassword.value; 
+        };
+
+        return { email, password, showPassword, message, errors, login, togglePasswordVisibility }; 
     } 
 }; 
 </script>
@@ -86,6 +111,7 @@
 { 
     margin-bottom: 15px; 
     text-align: left; 
+    position: relative;
 } 
 
 .form-group label 
@@ -104,6 +130,19 @@
     border-radius: 5px; 
 } 
 
+.password-group .toggle-password 
+{ 
+    position: absolute; 
+    top: 55px;
+    right: 10px; 
+    cursor: pointer; 
+} 
+
+.toggle-password .fa 
+{ 
+    color: #555; 
+}
+
 .btn-primary 
 { 
     background-color: #007bff; 
@@ -119,4 +158,10 @@
 { 
     background-color: #0056b3; 
 } 
+
+.text-danger 
+{ 
+    color: #dc3545; 
+    font-size: 14px; 
+}
 </style>
