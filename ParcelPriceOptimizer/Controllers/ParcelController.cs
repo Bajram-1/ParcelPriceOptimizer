@@ -54,7 +54,8 @@ namespace ParcelPriceOptimizer.Controllers
             } 
             catch (Exception ex) 
             { 
-                _logger.LogError(ex, "Error calculating price."); 
+                _logger.LogError(ex, "Error calculating price.");
+                return StatusCode(500, "An error occurred while calculating the price.");
             } 
         }
     }  
