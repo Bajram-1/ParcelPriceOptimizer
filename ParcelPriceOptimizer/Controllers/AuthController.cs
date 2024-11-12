@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.IdentityModel.Tokens;
 using ParcelPriceOptimizer.BLL.DTO.ViewModels;
+using ParcelPriceOptimizer.BLL.IServices;
 using ParcelPriceOptimizer.DAL.Entities;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -21,14 +22,16 @@ namespace ParcelPriceOptimizer.Controllers
         private readonly IConfiguration _configuration;
         private readonly ILogger<ApplicationUser> _logger;
         private readonly IEmailSender _emailSender;
+        private readonly ITokenService _tokenService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, ILogger<ApplicationUser> logger, IEmailSender emailSender)
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, ILogger<ApplicationUser> logger, IEmailSender emailSender, ITokenService tokenService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
             _configuration = configuration;
             _logger = logger;
             _emailSender = emailSender;
+            _tokenService = tokenService;
         }
 
         [HttpPost("login")]
@@ -47,30 +50,9 @@ namespace ParcelPriceOptimizer.Controllers
                 _logger.LogWarning("Invalid password for user: {Email}", model.Email);
                 return Unauthorized("Invalid email or password.");
             }
-            var token = GenerateJwtToken(user);
+            var token = _tokenService.GenerateJwtToken(user);
             _logger.LogInformation("Generated JWT token: {Token}", token);
             return Ok(new { token });
-        }
-
-        private string GenerateJwtToken(ApplicationUser user)
-        {
-            var claims = new List<Claim>
-        {
-            new Claim(JwtRegisteredClaimNames.Sub, user.Id),
-            new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-            new Claim(ClaimTypes.NameIdentifier, user.Id)
-        };
-
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]));
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
-
-            var token = new JwtSecurityToken(
-                issuer: _configuration["JwtSettings:Issuer"],
-                audience: _configuration["JwtSettings:Audience"],
-                claims: claims,
-                expires: DateTime.Now.AddMinutes(30),
-                signingCredentials: creds);
-            return new JwtSecurityTokenHandler().WriteToken(token);
         }
 
         [HttpPost("register")]
@@ -117,6 +99,28 @@ namespace ParcelPriceOptimizer.Controllers
             }
 
             return BadRequest("Email confirmation failed.");
+        }
+
+        [HttpPost("refresh")]
+        public async Task<IActionResult> Refresh([FromBody] TokenViewModel model)
+        {
+            var principal = _tokenService.GetPrincipalFromExpiredToken(model.Token);
+            var userId = principal?.FindFirstValue(ClaimTypes.NameIdentifier) ?? principal?.FindFirstValue(JwtRegisteredClaimNames.Sub);
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogWarning("Invalid token.");
+                return BadRequest("Invalid token.");
+            }
+            var user = await _userManager.FindByIdAsync(userId); 
+            
+            if (user == null) 
+            { 
+                _logger.LogWarning("User not found for the given token."); 
+                return Unauthorized("Invalid token."); 
+            }
+
+            var newToken = _tokenService.GenerateJwtToken(user); 
+            return Ok(new { newToken });
         }
     }
 }
