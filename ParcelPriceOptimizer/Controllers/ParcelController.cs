@@ -1,9 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using ParcelPriceOptimizer.BLL.DTO.ViewModels;
 using ParcelPriceOptimizer.BLL.IServices;
-using ParcelPriceOptimizer.BLL.Services;
-using System.Security.Claims;
 
 namespace ParcelPriceOptimizer.Controllers
 {
@@ -24,37 +21,37 @@ namespace ParcelPriceOptimizer.Controllers
             _logger = logger;
         }
 
-        [HttpPost("calculate")] 
-        public async Task<IActionResult> CalculatePrice([FromBody] CustomerInputViewModel input) 
-        { 
-            if (!ModelState.IsValid) 
-            { 
-                _logger.LogError("Invalid input data."); 
-                return BadRequest("Invalid input data."); 
+        [HttpPost("calculate")]
+        public async Task<IActionResult> CalculatePrice([FromBody] CustomerInputViewModel input)
+        {
+            if (!ModelState.IsValid)
+            {
+                _logger.LogError("Invalid input data.");
+                return BadRequest("Invalid input data.");
             }
 
             var userId = _userService.GetCurrentUserId();
 
-            if (string.IsNullOrEmpty(userId)) 
-            { 
-                _logger.LogError("User not logged in."); 
-                return Unauthorized("User not logged in."); 
-            } 
-            
-            input.UserId = userId; 
-            
-            try 
-            { 
+            if (string.IsNullOrEmpty(userId))
+            {
+                _logger.LogError("User not logged in.");
+                return Unauthorized("User not logged in.");
+            }
+
+            input.UserId = userId;
+
+            try
+            {
                 decimal price = _priceCalculationService.CalculatePrice(input);
                 await _customerInputService.SaveCustomerInputAsync(input, price);
-                _logger.LogInformation("Price calculated successfully: {Price}", price); 
-                return Ok(new { price }); 
-            } 
-            catch (Exception ex) 
-            { 
+                _logger.LogInformation("Price calculated successfully: {Price}", price);
+                return Ok(new { price });
+            }
+            catch (Exception ex)
+            {
                 _logger.LogError(ex, "Error calculating price.");
                 return StatusCode(500, "An error occurred while calculating the price.");
-            } 
+            }
         }
-    }  
+    }
 }
