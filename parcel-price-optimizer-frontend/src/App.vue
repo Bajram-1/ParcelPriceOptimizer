@@ -20,7 +20,7 @@
   
   export default 
   { 
-    name: 'App', 
+    name: 'AppRouter', 
     setup() 
     { 
       const store = useStore(); 
