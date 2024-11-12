@@ -4,7 +4,8 @@
         <p class="lead text-center mt-3">Optimize your shipping costs with ease!</p> 
         <p class="text-center"> Use our tools to calculate the best shipping price for your parcels and find the optimal shipping options available. </p> 
         <div class="text-center mt-4"> 
-            <router-link to="/calculate-parcel-price" class="btn btn-primary m-2">Calculate Parcel Price</router-link>
+            <router-link to="/calculate-parcel-price" class="btn btn-primary m-2">
+                <i class="fas fa-calculator me-2"></i> Go to Calculate Parcel Price</router-link>
         </div> 
     </div> 
 </template> 
