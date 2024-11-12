@@ -20,5 +20,10 @@ namespace ParcelPriceOptimizer.BLL.Services
         {
             return input.Weight >= 10 && input.Volume >= 500;
         }
+
+        public bool IsValidForAnyCompany(CustomerInputViewModel input) 
+        { 
+            return IsValidForCompany1(input) || IsValidForCompany2(input) || IsValidForCompany3(input); 
+        }
     }
 }

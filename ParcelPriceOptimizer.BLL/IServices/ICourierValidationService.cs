@@ -7,5 +7,6 @@ namespace ParcelPriceOptimizer.BLL.IServices
         bool IsValidForCompany1(CustomerInputViewModel input);
         bool IsValidForCompany2(CustomerInputViewModel input);
         bool IsValidForCompany3(CustomerInputViewModel input);
+        bool IsValidForAnyCompany(CustomerInputViewModel input);
     }
 }
