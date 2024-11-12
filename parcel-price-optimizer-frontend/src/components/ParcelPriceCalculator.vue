@@ -1,39 +1,41 @@
-<template>
- <div class="container mt-4"> 
-    <h1 class="text-center">Calculate Parcel Price</h1> 
-    
-    <form @submit.prevent="calculatePrice" class="p-4 border rounded bg-white shadow"> 
-        <div class="mb-3"> 
-            <label for="width" class="form-label">Width (cm):</label> 
-            <input type="number" v-model="width" class="form-control" required /> 
+<template> 
+    <div class="container mt-4"> 
+        <h1 class="text-center">Calculate Parcel Price</h1> 
+        <form @submit.prevent="calculatePrice" class="p-4 border rounded bg-white shadow"> 
+            <div class="mb-3"> 
+                <label for="width" class="form-label">Width (cm):</label> 
+                <input type="number" v-model.number="width" class="form-control" required min="1" @blur="validateNumberInput('width')" /> 
+            </div> 
+            <div class="mb-3"> 
+                <label for="height" class="form-label">Height (cm):</label> 
+                <input type="number" v-model.number="height" class="form-control" required min="1" @blur="validateNumberInput('height')" /> 
+            </div> 
+            <div class="mb-3"> 
+                <label for="depth" class="form-label">Depth (cm):</label> 
+                <input type="number" v-model.number="depth" class="form-control" required min="1" @blur="validateNumberInput('depth')" /> 
+            </div> 
+            <div class="mb-3"> 
+                <label for="weight" class="form-label">Weight (kg):</label> 
+                <input type="number" v-model.number="weight" class="form-control" required min="1" @blur="validateNumberInput('weight')" /> 
+            </div> 
+            <input type="hidden" v-model="userId" /> 
+            <button type="submit" class="btn btn-success w-100">
+                <i class="fas fa-calculator me-2"></i> Calculate Price</button> 
+        </form> 
+        <div v-if="price !== null" class="mt-4 text-center"> 
+            <h2 v-if="price === -1">The parcel does not meet the criteria for any company.</h2> 
+            <h2 v-else>Price: €{{ price }}</h2> 
+            <button v-if="price !== -1" @click="proceedToPayment" class="btn btn-primary mt-3">Proceed to Payment</button> 
         </div> 
-        <div class="mb-3"> 
-            <label for="height" class="form-label">Height (cm):</label> 
-            <input type="number" v-model="height" class="form-control" required /> 
-        </div> 
-        <div class="mb-3"> 
-            <label for="depth" class="form-label">Depth (cm):</label> 
-            <input type="number" v-model="depth" class="form-control" required /> 
-        </div> 
-        <div class="mb-3"> 
-            <label for="weight" class="form-label">Weight (kg):</label> 
-            <input type="number" v-model="weight" class="form-control" required /> 
-        </div>
-        <input type="hidden" v-model="userId" /> 
-        <button type="submit" class="btn btn-success w-100">Calculate Price</button> 
-    </form> 
-    <div v-if="price !== null" class="mt-4 text-center"> 
-        <h2>Price: €{{ price }}</h2> 
     </div> 
-</div> 
-</template> 
+</template>
 
 <script> 
     import axios from 'axios'; 
     
-    export default 
-    { 
+    export default { 
         name: 'ParcelPriceCalculator', 
+        
         data() 
         { 
             return { 
@@ -42,24 +44,96 @@
                 depth: null, 
                 weight: null, 
                 price: null, 
-                userId: null, 
+                userId: this.getUserIdFromToken(),
             }; 
         }, 
         mounted() 
-        {
-            const token = localStorage.getItem('token');
-            if (token) {
-                const decodedToken = JSON.parse(atob(token.split('.')[1]));
-                this.userId = decodedToken.sub;
-                console.log('UserId fetched from token:', this.userId);
-            } else {
-                console.error('No token found in localStorage');
-            }
-        },
-        methods: 
         { 
+            const token = localStorage.getItem('token'); 
+            
+            if (token) 
+            { 
+                const decodedToken = JSON.parse(atob(token.split('.')[1])); 
+                this.userId = decodedToken.sub; 
+                console.log('UserId fetched from token:', this.userId); 
+            } 
+            else 
+            { 
+                console.error('No token found in localStorage'); 
+            } 
+        }, methods: 
+        { 
+            validateNumberInput(field) 
+            {
+                if (this[field] !== null && this[field] < 1) 
+                {
+                    alert('Please enter a value greater than 0.');
+                    this[field] = null;
+                }
+            },
+            getUserIdFromToken() 
+            { 
+                const token = localStorage.getItem('token'); 
+                if (token) 
+                { 
+                    const decodedToken = JSON.parse(atob(token.split('.')[1])); 
+                    const exp = decodedToken.exp * 1000; 
+                    if (Date.now() >= exp) 
+                    { 
+                        console.error('Token has expired.'); 
+                        this.refreshToken();
+                        return null; 
+                    } 
+                    return decodedToken.sub; 
+                } 
+                else 
+                { 
+                    console.error('No token found in localStorage'); 
+                    return null; 
+                } 
+            },
+            async refreshToken() 
+            { 
+                const token = localStorage.getItem('token'); 
+                if (!token) 
+                    return; 
+                try 
+                { 
+                    const response = await axios.post('/api/auth/refresh', 
+                    { 
+                        token 
+                    }); 
+                    if (response.data && response.data.newToken) 
+                    { 
+                        localStorage.setItem('token', response.data.newToken); 
+                        console.log('Token refreshed successfully'); 
+                        this.setUserId(); 
+                    }
+                    else 
+                    { 
+                        console.error('Failed to refresh token.');
+                    } 
+                } 
+                catch (error) 
+                { 
+                    console.error('Error refreshing token:', error); 
+                } 
+            },
             async calculatePrice() 
             { 
+                this.userId = this.getUserIdFromToken();
+                if (!this.userId) 
+                { 
+                    console.error('User ID is null. User may not be logged in.'); 
+                    return; 
+                }
+
+                if ([this.width, this.height, this.depth, this.weight].some(val => val <= 0)) 
+                {
+                    alert('All input values must be greater than 0.');
+                    return;
+                }
+
                 try 
                 { 
                     console.log("Sending request to calculate price with data:", 
@@ -68,8 +142,9 @@
                         height: this.height, 
                         depth: this.depth, 
                         weight: this.weight, 
-                        userId: this.userId, 
+                        userId: this.userId,
                     }); 
+                    
                     if (!this.width || !this.height || !this.depth || !this.weight || !this.userId) 
                     { 
                         console.error('Invalid input data:', 
@@ -91,6 +166,7 @@
                         userId: this.userId, 
                     }); 
                     console.log("Response received:", response); 
+                    
                     if (response && response.data) 
                     { 
                         this.price = response.data.price; 
@@ -117,6 +193,35 @@
                     { 
                         console.error('Error message:', error.message); 
                     } 
+                } 
+            }, 
+            async proceedToPayment() 
+            { 
+                this.userId = this.getUserIdFromToken();
+                if (!this.userId) 
+                { 
+                    console.error('User ID is null. User may not be logged in.'); 
+                    return; 
+                }
+                try 
+                { 
+                    const response = await axios.post('https://localhost:7084/api/payment/create-session', 
+                    { 
+                        price: this.price, 
+                        userId: this.userId 
+                    }); 
+                    if (response.data && response.data.url) 
+                    { 
+                        window.location.href = response.data.url; 
+                    } 
+                    else 
+                    { 
+                        console.error('Error: Stripe session creation failed.'); 
+                    } 
+                } 
+                catch (error) 
+                { 
+                    console.error('Error proceeding to payment:', error); 
                 } 
             }, 
         }, 
