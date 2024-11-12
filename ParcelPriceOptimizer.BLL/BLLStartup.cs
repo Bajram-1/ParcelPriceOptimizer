@@ -12,6 +12,8 @@ namespace ParcelPriceOptimizer.BLL
             services.AddScoped<ICustomerInputService, CustomerInputService>();
             services.AddScoped<IPriceCalculationService, PriceCalculationService>();
             services.AddScoped<IUserService, UserService>();
+            services.AddScoped<IPaymentService, PaymentService>();
+            services.AddScoped<ITokenService, TokenService>();
         }
     }
 }
