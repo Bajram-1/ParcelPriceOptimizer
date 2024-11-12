@@ -9,7 +9,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParcelPriceOptimizer.DAL", 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParcelPriceOptimizer.BLL", "ParcelPriceOptimizer.BLL\ParcelPriceOptimizer.BLL.csproj", "{129706FE-E441-446B-91C5-9387D1EAD24A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParcelPriceOptimizer.Common", "ParcelPriceCalculator.Common\ParcelPriceOptimizer.Common.csproj", "{55AA1A17-7C3C-4514-AD13-B377986833D2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ParcelPriceOptimizer.Common", "ParcelPriceCalculator.Common\ParcelPriceOptimizer.Common.csproj", "{55AA1A17-7C3C-4514-AD13-B377986833D2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ParcelPriceOptimizer.Tests", "ParcelPriceOptimizer.Tests\ParcelPriceOptimizer.Tests.csproj", "{A8E45610-34F9-4DAD-B9DB-DB6948AED4AB}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -33,6 +35,10 @@ Global
 		{55AA1A17-7C3C-4514-AD13-B377986833D2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{55AA1A17-7C3C-4514-AD13-B377986833D2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{55AA1A17-7C3C-4514-AD13-B377986833D2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A8E45610-34F9-4DAD-B9DB-DB6948AED4AB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A8E45610-34F9-4DAD-B9DB-DB6948AED4AB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A8E45610-34F9-4DAD-B9DB-DB6948AED4AB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A8E45610-34F9-4DAD-B9DB-DB6948AED4AB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
