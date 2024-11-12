@@ -21,6 +21,11 @@ namespace ParcelPriceOptimizer.BLL.Services
 
         public decimal CalculatePrice(CustomerInputViewModel input)
         {
+            if (!_validationService.IsValidForAnyCompany(input))
+            {
+                return -1;
+            }
+
             decimal dimensionPrice = GetDimensionPrice(input);
             decimal weightPrice = GetWeightPrice(input);
             decimal finalPrice = Math.Max(dimensionPrice, weightPrice);
