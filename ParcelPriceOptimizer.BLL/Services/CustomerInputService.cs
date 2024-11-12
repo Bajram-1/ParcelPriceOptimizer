@@ -20,13 +20,15 @@ namespace ParcelPriceOptimizer.BLL.Services
         private readonly ILogger<CustomerInputService> _logger;
         private readonly IUserService _userService;
         private readonly IUserRepository _userRepository;
+        private readonly ApplicationDbContext _context;
 
-        public CustomerInputService(ICustomerInputRepository repository, ILogger<CustomerInputService> logger, IUserService userService, IUserRepository userRepository)
+        public CustomerInputService(ICustomerInputRepository repository, ILogger<CustomerInputService> logger, IUserService userService, IUserRepository userRepository, ApplicationDbContext applicationDbContext)
         {
             _repository = repository;
             _logger = logger;
             _userService = userService;
             _userRepository = userRepository;
+            _context = applicationDbContext;
         }
 
         public async Task SaveCustomerInputAsync(CustomerInputViewModel input, decimal price)
@@ -53,7 +55,9 @@ namespace ParcelPriceOptimizer.BLL.Services
                 Depth = input.Depth,
                 Weight = input.Weight,
                 Price = price,
-                SubmittedAt = DateTime.Now
+                SubmittedAt = DateTime.Now,
+                StripeSessionId = null, 
+                StripePaymentIntentId = null
             };
 
             await _repository.AddAsync(customerInput);
