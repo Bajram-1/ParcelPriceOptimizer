@@ -17,5 +17,8 @@ namespace ParcelPriceOptimizer.DAL.Entities
         public decimal Weight { get; set; }
         public decimal Price { get; set; }
         public DateTime SubmittedAt { get; set; } = DateTime.Now;
+        public string? StripeSessionId { get; set; } 
+        public string? StripePaymentIntentId { get; set; }
+        public bool IsPaymentCompleted { get; set; }
     }
 }
