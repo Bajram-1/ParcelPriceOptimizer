@@ -21,20 +21,31 @@ namespace ParcelPriceOptimizer.DAL.Repositories
             _logger = logger;
         }
 
-        public async Task AddAsync(CustomerInput customerInput) 
-        {  
-            await _context.CustomerInputs.AddAsync(customerInput); 
-            
-            try 
-            { 
-                await _context.SaveChangesAsync(); 
-                _logger.LogInformation("CustomerInput saved successfully."); 
-            } 
-            catch (Exception ex) 
-            { 
-                _logger.LogError(ex, "Error saving CustomerInput. UserId={UserId}", customerInput.UserId); 
-                throw; 
-            } 
+        public async Task AddAsync(CustomerInput customerInput)
+        {
+            await _context.CustomerInputs.AddAsync(customerInput);
+
+            try
+            {
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("CustomerInput saved successfully.");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error saving CustomerInput. UserId={UserId}", customerInput.UserId);
+                throw;
+            }
+        }
+
+        public async Task UpdateAsync(CustomerInput customerInput)
+        {
+            _context.CustomerInputs.Update(customerInput);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task<CustomerInput> GetByIdAsync(int id)
+        {
+            return await _context.CustomerInputs.FindAsync(id);
         }
     }
 }
