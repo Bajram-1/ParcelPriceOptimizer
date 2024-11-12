@@ -59,6 +59,18 @@
                 }
             } catch (error) {
                 console.error('Error logging in:', error);
+                if (error.response && error.response.status === 401) 
+                { 
+                    message.value = 'Invalid username or password. Please try again.'; 
+                } 
+                else 
+                { 
+                    message.value = 'An error occurred while attempting to log in. Please try again later.'; 
+                }
+                setTimeout(() => 
+                { 
+                    message.value = ''; 
+                }, 3000);
                 if (error.response) {
                     console.error('Response error:', error.response.data); // Server error response
                 } else if (error.request) {
