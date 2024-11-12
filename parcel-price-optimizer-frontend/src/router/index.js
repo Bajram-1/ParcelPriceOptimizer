@@ -3,6 +3,7 @@ import HomeView from '../components/Home.vue';
 import ParcelPriceCalculator from '../components/ParcelPriceCalculator.vue'; 
 import UserLogin from '../components/UserLogin.vue'; 
 import UserRegister from '../components/UserRegister.vue'; 
+import PaymentSuccess from '../components/PaymentSuccess.vue';
 import store from '../store'; const routes = [ 
    { 
       path: '/', 
@@ -23,7 +24,16 @@ import store from '../store'; const routes = [
       path: '/register', 
       name: 'UserRegister', 
       component: UserRegister 
-   } 
+   },
+   {
+      path: '/payment-success',
+      name: 'PaymentSuccess',
+      component: PaymentSuccess
+   },
+   { 
+      path: '/:pathMatch(.*)*', 
+      redirect: '/' 
+   }
 ]; 
 
 const router = createRouter(
