@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Identity.UI.Services;
 using ParcelPriceOptimizer.Common;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.OpenApi.Models;
+using Stripe;
 
 var builder = WebApplication.CreateBuilder(args); 
 
@@ -38,6 +39,9 @@ builder.Services.RegisterBLLServices();
 builder.Services.RegisterDALServices(builder.Configuration);
 builder.Services.AddLogging();
 builder.Services.AddTransient<IEmailSender, EmailSender>();
+
+builder.Services.Configure<StripeSettings>(builder.Configuration.GetSection("Stripe"));
+builder.Services.Configure<MailJetSettings>(builder.Configuration.GetSection("MailJet"));
 
 var jwtIssuer = builder.Configuration["JwtSettings:Issuer"]; 
 var jwtAudience = builder.Configuration["JwtSettings:Audience"]; 
@@ -143,9 +147,16 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection(); 
 app.UseCors("AllowFrontend");
 app.UseCors("AllowAllOrigins");
+StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 app.UseRouting(); 
 app.UseAuthentication(); 
-app.UseAuthorization(); 
+app.UseAuthorization();
+
+app.MapGet("/payment-success", context =>
+{
+    context.Response.Redirect("/api/payment/payment-success");
+    return Task.CompletedTask;
+});
 app.UseEndpoints(endpoints => { 
     endpoints.MapRazorPages(); 
     endpoints.MapControllers(); 
