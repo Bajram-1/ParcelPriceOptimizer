@@ -125,6 +125,16 @@ builder.Services.AddCors(options =>
     }); 
 });
 
+builder.Services.AddCors(options => 
+{ 
+    options.AddPolicy("AllowLocalhost", builder => 
+    { 
+        builder.WithOrigins("http://localhost:8080")
+               .AllowAnyHeader()
+               .AllowAnyMethod(); 
+    }); 
+});
+
 builder.Services.AddControllers(); 
 builder.Services.AddCors(options => { 
     options.AddPolicy("AllowFrontend", policy => { 
@@ -147,6 +157,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection(); 
 app.UseCors("AllowFrontend");
 app.UseCors("AllowAllOrigins");
+app.UseCors("AllowLocalhost");
 StripeConfiguration.ApiKey = builder.Configuration.GetSection("Stripe:SecretKey").Get<string>();
 app.UseRouting(); 
 app.UseAuthentication(); 
