@@ -5,7 +5,7 @@
         <i class="fas fa-smile-beam fa-4x text-warning my-4"></i>
         <div class="mt-4">
             <router-link to="/" class="btn btn-outline-success btn-lg">
-                <i class="fas fa-home me-2"></i>Return to Home
+                <i class="fas fa-home me-2"></i> Return to Home
             </router-link>
         </div>
     </div>
@@ -13,6 +13,7 @@
 
 <script>
 import axios from 'axios';
+import { useToast } from 'vue-toastification';
 
 export default {
   name: 'PaymentSuccess',
@@ -22,17 +23,27 @@ export default {
     };
   },
   created() {
-    axios.get('/api/payment/payment-success')
+    const toast = useToast();
+
+    axios.get('https://localhost:7084/api/payment/payment-success')
       .then(response => {
         console.log('Payment success response:', response); 
         if (response.data && response.data.message) {
           this.confirmationMessage = response.data.message;
+          toast.success(this.confirmationMessage);
         } else {
           this.confirmationMessage = 'Payment was successful, but no confirmation message was received.';
+          toast.success(this.confirmationMessage);
         }
       })
-  }
-};
+      .catch(error => 
+      { 
+        console.log('Error fetching payment success message:', error); 
+        this.confirmationMessage = 'Payment was successful.'; 
+        toast.success('Payment was successful.'); 
+      });
+    } 
+  };
 </script>
 
 <style scoped>

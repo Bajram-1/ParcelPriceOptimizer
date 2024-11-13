@@ -35,6 +35,7 @@
 
 <script>
 import axios from 'axios';
+import { useToast } from 'vue-toastification';
 
 export default {
     name: 'ParcelPriceCalculator',
@@ -120,6 +121,8 @@ export default {
             }
         },
         async calculatePrice() {
+            const toast = useToast();
+
             if ([this.width, this.height, this.depth, this.weight].some(val => val <= 0)) {
                 alert('All input values must be greater than 0.');
                 return;
@@ -153,8 +156,10 @@ export default {
 
                 if (response && response.data) {
                     this.price = response.data.price;
+                    toast.success('Price calculated successfully.');
                     console.log('Price calculated successfully:', this.price);
                 } else {
+                    toast.error('Error: Calculate price response data is undefined');
                     console.error('Error: Calculate price response data is undefined');
                 }
             } 

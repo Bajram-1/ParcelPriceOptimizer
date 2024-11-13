@@ -55,6 +55,7 @@
     import axios from 'axios'; 
     import { ref } from 'vue'; 
     import { useRouter } from 'vue-router'; 
+    import { useToast } from 'vue-toastification';
     
     export default 
     { 
@@ -72,6 +73,7 @@
             const message = ref(''); 
             const errors = ref({});
             const router = useRouter(); 
+            const toast = useToast();
             const register = async () => 
             { 
                 try 
@@ -85,6 +87,7 @@
                         confirmPassword: confirmPassword.value 
                     }); 
                     message.value = response.data.Message; 
+                    toast.success('Registered successfully');
                     setTimeout(() => 
                     { 
                         router.push('/login'); 

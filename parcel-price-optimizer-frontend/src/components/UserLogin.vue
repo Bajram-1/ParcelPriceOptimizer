@@ -26,7 +26,8 @@
 <script> 
     import axios from 'axios'; 
     import { ref } from 'vue'; 
-    import { useRouter } from 'vue-router'; 
+    import { useRouter } from 'vue-router';
+    import { useToast } from "vue-toastification"; 
     import store from '../store';
     
     export default { name: 'UserLogin', setup() 
@@ -37,6 +38,7 @@
         const message = ref('');
         const errors = ref({});
         const router = useRouter(); 
+        const toast = useToast();
         
         const login = async () => {
             try {
@@ -45,15 +47,16 @@
                     password: password.value
                 });
 
-                console.log('Response:', response);  // Log the whole response
+                console.log('Response:', response);
 
                 if (response && response.data) {
                     const token = response.data.token;
                     localStorage.setItem('token', token);
                     axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-                    store.commit('setToken', token); // Store token in Vuex
+                    store.commit('setToken', token);
                     console.log('Logged in successfully:', response.data); 
-                    router.push('/'); // Redirect to the home page
+                    toast.success('Logged in successfully');
+                    router.push('/');
                 } else {
                     console.error('No data in response');
                 }
@@ -72,11 +75,11 @@
                     message.value = ''; 
                 }, 3000);
                 if (error.response) {
-                    console.error('Response error:', error.response.data); // Server error response
+                    console.error('Response error:', error.response.data);
                 } else if (error.request) {
-                    console.error('Request error:', error.request); // No response from server
+                    console.error('Request error:', error.request);
                 } else {
-                    console.error('Unexpected error:', error.message); // Any other error
+                    console.error('Unexpected error:', error.message);
                 }
             }
         };
