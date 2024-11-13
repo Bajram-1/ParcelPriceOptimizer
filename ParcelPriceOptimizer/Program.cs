@@ -157,6 +157,13 @@ app.MapGet("/payment-success", context =>
     context.Response.Redirect("/api/payment/payment-success");
     return Task.CompletedTask;
 });
+
+app.MapGet("/payment-cancelled", context =>
+{
+    context.Response.Redirect("api/payment/payment-cancelled");
+    return Task.CompletedTask;
+});
+
 app.UseEndpoints(endpoints => { 
     endpoints.MapRazorPages(); 
     endpoints.MapControllers(); 
