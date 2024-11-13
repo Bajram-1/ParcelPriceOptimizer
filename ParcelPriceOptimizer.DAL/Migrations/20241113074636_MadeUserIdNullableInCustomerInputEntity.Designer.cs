@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using ParcelPriceOptimizer.DAL;
 
@@ -11,9 +12,11 @@ using ParcelPriceOptimizer.DAL;
 namespace ParcelPriceOptimizer.DAL.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20241113074636_MadeUserIdNullableInCustomerInputEntity")]
+    partial class MadeUserIdNullableInCustomerInputEntity
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -255,7 +258,7 @@ namespace ParcelPriceOptimizer.DAL.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Couriers", (string)null);
+                    b.ToTable("Couriers");
                 });
 
             modelBuilder.Entity("ParcelPriceOptimizer.DAL.Entities.CourierPricingRule", b =>
@@ -291,7 +294,7 @@ namespace ParcelPriceOptimizer.DAL.Migrations
 
                     b.HasIndex("CourierId");
 
-                    b.ToTable("CourierPricingRules", (string)null);
+                    b.ToTable("CourierPricingRules");
                 });
 
             modelBuilder.Entity("ParcelPriceOptimizer.DAL.Entities.CustomerInput", b =>
@@ -336,7 +339,7 @@ namespace ParcelPriceOptimizer.DAL.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("CustomerInputs", (string)null);
+                    b.ToTable("CustomerInputs");
                 });
 
             modelBuilder.Entity("ParcelPriceOptimizer.DAL.Entities.ShippingQuote", b =>
@@ -360,7 +363,7 @@ namespace ParcelPriceOptimizer.DAL.Migrations
 
                     b.HasIndex("CourierId");
 
-                    b.ToTable("ShippingQuotes", (string)null);
+                    b.ToTable("ShippingQuotes");
                 });
 
             modelBuilder.Entity("ParcelPriceOptimizer.DAL.Entities.ApplicationUser", b =>
