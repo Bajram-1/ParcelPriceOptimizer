@@ -8,7 +8,7 @@ namespace ParcelPriceOptimizer.DAL.Entities
 {
     public class CustomerInput : BaseEntityWithKey
     {
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
         public ApplicationUser User { get; set; }
         public decimal Width { get; set; }
         public decimal Height { get; set; }

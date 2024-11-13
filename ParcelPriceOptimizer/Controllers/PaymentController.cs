@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using ParcelPriceOptimizer.BLL.DTO.ViewModels;
 using ParcelPriceOptimizer.BLL.IServices;
 using ParcelPriceOptimizer.DAL.Entities;
+using System.Security.Claims;
 
 namespace ParcelPriceOptimizer.Controllers
 {
@@ -14,14 +15,18 @@ namespace ParcelPriceOptimizer.Controllers
         private readonly IConfiguration _configuration;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IPaymentService _paymentService;
+        private readonly IUserService _userService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
 
-        public PaymentController(ILogger<PaymentController> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, IPaymentService paymentService)
+        public PaymentController(ILogger<PaymentController> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, IPaymentService paymentService, IUserService userService, IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
             _configuration = configuration;
             _userManager = userManager;
             _paymentService = paymentService;
+            _userService = userService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         [HttpGet("payment-success")]
@@ -36,28 +41,18 @@ namespace ParcelPriceOptimizer.Controllers
         {
             _logger.LogInformation("Payment was cancelled.");
             string frontendUrl = _configuration["FrontendUrl"];
-            return Redirect($"{frontendUrl}/calculate-parcel-price");
+
+            string userId = _userService.GetCurrentUserId();
+
+            return Redirect($"{frontendUrl}/calculate-parcel-price?userId={userId}");
         }
         [HttpPost("create-session")]
         public async Task<IActionResult> CreateStripeSession([FromBody] ParcelPaymentViewModel input)
         {
             try
             {
-                var user = await _userManager.GetUserAsync(User);
-
-                if (user == null)
-                {
-                    _logger.LogWarning("User not logged in or could not be found.");
-                    return Unauthorized("User is not logged in.");
-                }
-
-                var userId = user.Id;
-
-                if (string.IsNullOrWhiteSpace(userId))
-                {
-                    _logger.LogWarning("User ID is null or empty.");
-                    return BadRequest("User ID cannot be null or empty.");
-                }
+                var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                        ?? _httpContextAccessor.HttpContext.User.FindFirst("sub")?.Value;
 
                 input.UserId = userId;
 

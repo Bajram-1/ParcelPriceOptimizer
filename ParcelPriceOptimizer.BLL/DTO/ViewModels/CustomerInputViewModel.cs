@@ -5,7 +5,7 @@ namespace ParcelPriceOptimizer.BLL.DTO.ViewModels
 {
     public class CustomerInputViewModel
     {
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
         public decimal Width { get; set; }
         public decimal Height { get; set; }
         public decimal Depth { get; set; }
