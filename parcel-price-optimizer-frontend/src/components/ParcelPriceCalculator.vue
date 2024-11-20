@@ -23,10 +23,25 @@
                 <i :class="isLoading ? 'fas fa-spinner fa-spin' : 'fas fa-calculator me-2'"></i> Calculate Price
             </button>
         </form>
-        <div v-if="price !== null" class="mt-4 text-center">
-            <h2 v-if="price === -1">The parcel does not meet the criteria for any company.</h2>
-            <h2 v-else>Price: €{{ price }}</h2>
-            <button v-if="price !== -1" @click="proceedToPayment" class="btn btn-primary mt-3">
+        <div v-if="couriers.length > 0" class="mt-4 text-center">
+            <h4>Choose a Courier Company:</h4>
+            <div class="form-check" v-for="(courier, index) in couriers" :key="index">
+                <input
+                    type="radio"
+                    :id="'courier-' + index"
+                    :value="courier"
+                    v-model="selectedCourier"
+                    class="form-check-input"
+                />
+                <label :for="'courier-' + index" class="form-check-label">
+                    <strong>{{ courier.courier }}</strong>: {{ courier.price }}
+                </label>
+            </div>
+            <button
+                v-if="selectedCourier"
+                @click="proceedToPayment"
+                class="btn btn-primary mt-3"
+            >
                 <i class="fas fa-credit-card me-2"></i> Proceed to Payment
             </button>
         </div>
@@ -39,23 +54,20 @@ import { useToast } from 'vue-toastification';
 
 export default {
     name: 'ParcelPriceCalculator',
-
     data() {
         return {
             width: null,
             height: null,
             depth: null,
             weight: null,
-            price: null,
             userId: this.getUserIdFromToken(),
+            couriers: [],
+            price: null,
+            selectedCourier: null,
             isLoading: false,
         };
     },
-    mounted() 
-    {
-        this.userId = this.$route.query.userId;
-        console.log("User ID:", this.userId);
-
+    mounted() {
         const token = localStorage.getItem('token');
         if (!token) {
             console.error('No token found in localStorage');
@@ -80,8 +92,7 @@ export default {
                 this[field] = null;
             }
         },
-        getUserIdFromToken() 
-        {
+        getUserIdFromToken() {
             const token = localStorage.getItem('token');
             if (!token) {
                 console.error('No token found in localStorage');
@@ -129,8 +140,7 @@ export default {
             }
 
             this.isLoading = true;
-            try 
-            {
+            try {
                 console.log('Calculating price with:', {
                     width: this.width,
                     height: this.height,
@@ -145,38 +155,61 @@ export default {
                     depth: this.depth,
                     weight: this.weight,
                     userId: this.userId || undefined,
-                },
-                {
-                    headers: 
-                    {
+                }, {
+                    headers: {
                         Authorization: `Bearer ${localStorage.getItem('token')}`
                     }
-                }
-            );
+                });
 
-                if (response && response.data) {
-                    this.price = response.data.price;
-                    toast.success('Price calculated successfully.');
-                    console.log('Price calculated successfully:', this.price);
+                console.log('API response:', response);
+
+                if (Array.isArray(response.data) && response.data.length > 0) 
+                {
+                    this.couriers = response.data;
+                    this.price = Math.max(
+                    ...this.couriers.map(c => {
+                    if (c.Price && typeof c.Price === 'string') 
+                    {    
+                        const priceString = c.Price.slice(1);
+                        const parsedPrice = parseFloat(priceString);
+                        return isNaN(parsedPrice) ? 0 : parsedPrice;
+                    }
+                    return 0;
+                })
+            );
+                    toast.success('Prices calculated successfully.');
                 } else {
-                    toast.error('Error: Calculate price response data is undefined');
-                    console.error('Error: Calculate price response data is undefined');
+                    toast.error('Invalid response data.');
+                    console.error('Invalid response format:', response.data);
                 }
-            } 
-            catch (error) 
-            {
-                console.error('Error calculating price:', error);
-            }
-            finally 
-            {
+            } catch (error) {
+                console.error('Error calculating price:', error.response ? error.response.data : error.message);
+                toast.error(`Error: ${error.response ? error.response.data : error.message}`);
+            } finally {
                 this.isLoading = false;
             }
         },
         async proceedToPayment() {
+            if (!this.selectedCourier) {
+                alert("Please select a courier.");
+                return;
+            }
+
+            // Ensure the price is in a proper numeric format
+            const priceString = this.selectedCourier.price;
+            const cleanedPriceString = priceString.replace(/[^0-9.-]+/g, '');  // Remove any non-numeric characters (like $)
+            const parsedPrice = parseFloat(cleanedPriceString);
+
+            if (isNaN(parsedPrice)) {
+                alert("Invalid price selected.");
+                return;
+            }
+
             try {
                 const response = await axios.post('https://localhost:7084/api/payment/create-session', {
-                    price: this.price,
-                    userId: this.userId || null,
+                    price: parsedPrice,
+                    userId: this.userId || 'default-user-id',
+                    courier: this.selectedCourier.courier,
                 });
 
                 if (response.data && response.data.url) {
@@ -187,7 +220,7 @@ export default {
             } catch (error) {
                 console.error('Error proceeding to payment:', error);
             }
-        },
+        }
     },
 };
 </script>
