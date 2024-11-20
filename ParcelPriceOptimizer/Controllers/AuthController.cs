@@ -35,90 +35,122 @@ namespace ParcelPriceOptimizer.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login([FromBody] LoginViewModel model)
         {
-            var user = await _userManager.FindByEmailAsync(model.Email);
+            try
+            {
+                var user = await _userManager.FindByEmailAsync(model.Email);
 
-            if (user == null)
-            {
-                _logger.LogWarning("User not found: {Email}", model.Email);
-                return Unauthorized("Invalid email or password.");
+                if (user == null)
+                {
+                    _logger.LogWarning("User not found: {Email}", model.Email);
+                    return Unauthorized("Invalid email or password.");
+                }
+
+                var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
+                if (!result.Succeeded)
+                {
+                    _logger.LogWarning("Invalid password for user: {Email}", model.Email);
+                    return Unauthorized("Invalid email or password.");
+                }
+
+                var token = _tokenService.GenerateJwtToken(user);
+                _logger.LogInformation("Generated JWT token: {Token}", token);
+                return Ok(new { token });
             }
-            var result = await _signInManager.CheckPasswordSignInAsync(user, model.Password, false);
-            if (!result.Succeeded)
+            catch (Exception)
             {
-                _logger.LogWarning("Invalid password for user: {Email}", model.Email);
-                return Unauthorized("Invalid email or password.");
+                throw;
             }
-            var token = _tokenService.GenerateJwtToken(user);
-            _logger.LogInformation("Generated JWT token: {Token}", token);
-            return Ok(new { token });
         }
 
         [HttpPost("register")]
         public async Task<IActionResult> Register([FromBody] RegisterViewModel model)
         {
-            var user = new ApplicationUser
+            try
             {
-                UserName = model.Email,
-                Email = model.Email,
-                Name = model.FirstName,
-                LastName = model.LastName
-            };
+                var user = new ApplicationUser
+                {
+                    UserName = model.Email,
+                    Email = model.Email,
+                    Name = model.FirstName,
+                    LastName = model.LastName
+                };
 
-            var result = await _userManager.CreateAsync(user, model.Password);
-            if (result.Succeeded)
-            {
-                var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                var encodedCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code)); var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, code = encodedCode }, protocol: HttpContext.Request.Scheme); await _emailSender.SendEmailAsync(model.Email, "Confirm your email", $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."); return Ok(new { Message = "Registration successful. Please check your email to confirm your account." });
+                var result = await _userManager.CreateAsync(user, model.Password);
+                if (result.Succeeded)
+                {
+                    var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
+                    var encodedCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code)); var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, code = encodedCode }, protocol: HttpContext.Request.Scheme); await _emailSender.SendEmailAsync(model.Email, "Confirm your email", $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."); return Ok(new { Message = "Registration successful. Please check your email to confirm your account." });
+                }    
+                return BadRequest(result.Errors);
             }
-            return BadRequest(result.Errors);
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         [HttpGet("ConfirmEmail")]
         public async Task<IActionResult> ConfirmEmail(string userId, string code)
         {
-            if (userId == null || code == null)
+            try
             {
-                return BadRequest("Invalid email confirmation request.");
-            }
-            var user = await _userManager.FindByIdAsync(userId);
+                if (userId == null || code == null)
+                {
+                    return BadRequest("Invalid email confirmation request.");
+                }
+                var user = await _userManager.FindByIdAsync(userId);
 
-            if (user == null)
+                if (user == null)
+                {
+                    return BadRequest("The user ID is invalid.");
+                }
+
+                var decodedCodeBytes = WebEncoders.Base64UrlDecode(code);
+                var decodedCode = Encoding.UTF8.GetString(decodedCodeBytes);
+                var result = await _userManager.ConfirmEmailAsync(user, decodedCode);
+
+                if (result.Succeeded)
+                {
+                    return Ok("Email confirmed successfully!");
+                }
+
+                return BadRequest("Email confirmation failed.");
+            }
+            catch (Exception)
             {
-                return BadRequest("The user ID is invalid.");
+
+                throw;
             }
-
-            var decodedCodeBytes = WebEncoders.Base64UrlDecode(code);
-            var decodedCode = Encoding.UTF8.GetString(decodedCodeBytes);
-            var result = await _userManager.ConfirmEmailAsync(user, decodedCode);
-
-            if (result.Succeeded)
-            {
-                return Ok("Email confirmed successfully!");
-            }
-
-            return BadRequest("Email confirmation failed.");
         }
 
         [HttpPost("refresh")]
         public async Task<IActionResult> Refresh([FromBody] TokenViewModel model)
         {
-            var principal = _tokenService.GetPrincipalFromExpiredToken(model.Token);
-            var userId = principal?.FindFirstValue(ClaimTypes.NameIdentifier) ?? principal?.FindFirstValue(JwtRegisteredClaimNames.Sub);
-            if (string.IsNullOrEmpty(userId))
+            try
             {
-                _logger.LogWarning("Invalid token.");
-                return BadRequest("Invalid token.");
-            }
-            var user = await _userManager.FindByIdAsync(userId); 
-            
-            if (user == null) 
-            { 
-                _logger.LogWarning("User not found for the given token."); 
-                return Unauthorized("Invalid token."); 
-            }
+                var principal = _tokenService.GetPrincipalFromExpiredToken(model.Token);
+                
+                var userId = principal?.FindFirstValue(ClaimTypes.NameIdentifier) ?? principal?.FindFirstValue(JwtRegisteredClaimNames.Sub);
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogWarning("Invalid token.");
+                    return BadRequest("Invalid token.");
+                }
+                
+                var user = await _userManager.FindByIdAsync(userId);
+                if (user == null)
+                {
+                    _logger.LogWarning("User not found for the given token.");
+                    return Unauthorized("Invalid token.");
+                }
 
-            var newToken = _tokenService.GenerateJwtToken(user); 
-            return Ok(new { newToken });
+                var newToken = _tokenService.GenerateJwtToken(user);
+                return Ok(new { newToken });
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

@@ -24,33 +24,33 @@ namespace ParcelPriceOptimizer.Controllers
         [HttpPost("calculate")]
         public async Task<IActionResult> CalculatePrice([FromBody] CustomerInputViewModel input)
         {
-            if (!ModelState.IsValid)
-            {
-                _logger.LogError("Invalid input data.");
-                return BadRequest("Invalid input data.");
-            }
-
-            var userId = _userService.GetCurrentUserId();
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                _logger.LogError("User not logged in.");
-                return Unauthorized("User not logged in.");
-            }
-
-            input.UserId = userId;
-
             try
             {
+                if (!ModelState.IsValid)
+                {
+                    _logger.LogError("Invalid input data.");
+                    return BadRequest("Invalid input data.");
+                }
+
+                var userId = _userService.GetCurrentUserId();
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    _logger.LogError("User not logged in.");
+                    return Unauthorized("User not logged in.");
+                }
+
+                input.UserId = userId;
+
                 decimal price = _priceCalculationService.CalculatePrice(input);
                 await _customerInputService.SaveCustomerInputAsync(input, price);
                 _logger.LogInformation("Price calculated successfully: {Price}", price);
                 return Ok(new { price });
             }
-            catch (Exception ex)
+            catch (Exception)
             {
-                _logger.LogError(ex, "Error calculating price.");
-                return StatusCode(500, "An error occurred while calculating the price.");
+
+                throw;
             }
         }
     }

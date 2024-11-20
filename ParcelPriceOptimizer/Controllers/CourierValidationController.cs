@@ -18,37 +18,58 @@ namespace ParcelPriceOptimizer.Controllers
         [HttpPost("validforcompany1")]
         public IActionResult ValidateForCompany1([FromBody] CustomerInputViewModel input)
         {
-            if (input == null)
+            try
             {
-                return BadRequest("Invalid package input.");
-            }
+                if (input == null)
+                {
+                    return BadRequest("Invalid package input.");
+                }
 
-            bool isValid = _courierValidationService.IsValidForCompany1(input);
-            return Ok(isValid);
+                bool isValid = _courierValidationService.IsValidForCompany1(input);
+                return Ok(isValid);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         [HttpPost("validforcompany2")]
         public IActionResult ValidateForCompany2([FromBody] CustomerInputViewModel input)
         {
-            if (input == null)
+            try
             {
-                return BadRequest("Invalid package input.");
-            }
+                if (input == null)
+                {
+                    return BadRequest("Invalid package input.");
+                }
 
-            bool isValid = _courierValidationService.IsValidForCompany2(input);
-            return Ok(isValid);
+                bool isValid = _courierValidationService.IsValidForCompany2(input);
+                return Ok(isValid);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         [HttpPost("validforcompany3")]
         public IActionResult ValidateForCompany3([FromBody] CustomerInputViewModel input)
         {
-            if (input == null)
+            try
             {
-                return BadRequest("Invalid package input.");
-            }
+                if (input == null)
+                {
+                    return BadRequest("Invalid package input.");
+                }
 
-            bool isValid = _courierValidationService.IsValidForCompany3(input);
-            return Ok(isValid);
+                bool isValid = _courierValidationService.IsValidForCompany3(input);
+                return Ok(isValid);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }

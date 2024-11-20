@@ -30,19 +30,31 @@ namespace ParcelPriceOptimizer.Controllers
         [HttpGet("payment-success")]
         public IActionResult PaymentSuccess()
         {
-            _logger.LogInformation("Payment was successful.");
-            string frontendUrl = _configuration["FrontendUrl"];
-            return Redirect($"{frontendUrl}/payment-success");
+            try
+            {
+                _logger.LogInformation("Payment was successful.");
+                string frontendUrl = _configuration["FrontendUrl"];
+                return Redirect($"{frontendUrl}/payment-success");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
         [HttpGet("payment-cancelled")]
         public IActionResult PaymentCancelled()
         {
-            _logger.LogInformation("Payment was cancelled.");
-            string frontendUrl = _configuration["FrontendUrl"];
-
-            string userId = _userService.GetCurrentUserId();
-
-            return Redirect($"{frontendUrl}/calculate-parcel-price?userId={userId}");
+            try
+            {
+                _logger.LogInformation("Payment was cancelled.");
+                string frontendUrl = _configuration["FrontendUrl"];
+                string userId = _userService.GetCurrentUserId();
+                return Redirect($"{frontendUrl}/calculate-parcel-price?userId={userId}");
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
         [HttpPost("create-session")]
         public async Task<IActionResult> CreateStripeSession([FromBody] ParcelPaymentViewModel input)
