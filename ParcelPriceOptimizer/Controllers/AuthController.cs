@@ -79,7 +79,10 @@ namespace ParcelPriceOptimizer.Controllers
                 if (result.Succeeded)
                 {
                     var code = await _userManager.GenerateEmailConfirmationTokenAsync(user);
-                    var encodedCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code)); var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, code = encodedCode }, protocol: HttpContext.Request.Scheme); await _emailSender.SendEmailAsync(model.Email, "Confirm your email", $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."); return Ok(new { Message = "Registration successful. Please check your email to confirm your account." });
+                    var encodedCode = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code)); 
+                    var callbackUrl = Url.Action("ConfirmEmail", "Auth", new { userId = user.Id, code = encodedCode }, protocol: HttpContext.Request.Scheme); 
+                    await _emailSender.SendEmailAsync(model.Email, "Confirm your email", $"Please confirm your account by <a href='{HtmlEncoder.Default.Encode(callbackUrl)}'>clicking here</a>."); 
+                    return Ok(new { Message = "Registration successful. Please check your email to confirm your account." });
                 }    
                 return BadRequest(result.Errors);
             }
