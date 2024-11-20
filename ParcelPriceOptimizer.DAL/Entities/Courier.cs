@@ -14,6 +14,5 @@ namespace ParcelPriceOptimizer.DAL.Entities
         public decimal MinVolume { get; set; }
         public decimal MaxVolume { get; set; }
         public ICollection<CourierPricingRule> CourierPricingRules { get; set; }
-        public ICollection<ShippingQuote> ShippingQuotes { get; set; }
     }
 }

@@ -19,7 +19,6 @@ namespace ParcelPriceOptimizer.DAL
         public DbSet<Courier> Couriers { get; set; }
         public DbSet<CourierPricingRule> CourierPricingRules { get; set; }
         public DbSet<CustomerInput> CustomerInputs { get; set; }
-        public DbSet<ShippingQuote> ShippingQuotes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -30,12 +29,6 @@ namespace ParcelPriceOptimizer.DAL
                 .WithOne(r => r.Courier)
                 .HasForeignKey(r => r.CourierId)
                 .OnDelete(DeleteBehavior.Cascade);
-
-            modelBuilder.Entity<ShippingQuote>()
-               .HasOne(sq => sq.Courier)
-               .WithMany(c => c.ShippingQuotes)
-               .HasForeignKey(sq => sq.CourierId)
-               .OnDelete(DeleteBehavior.Restrict);
 
             modelBuilder.Entity<CustomerInput>()
                 .HasOne(ci => ci.User)
