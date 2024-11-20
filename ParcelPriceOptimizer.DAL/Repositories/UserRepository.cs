@@ -31,26 +31,6 @@ namespace ParcelPriceOptimizer.DAL.Repositories
             _httpContextAccessor = httpContextAccessor;
         }
 
-        public string GetCurrentUserId()
-        {
-            var claims = _httpContextAccessor.HttpContext.User.Claims;
-
-            foreach (var claim in claims)
-            {
-                Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
-            }
-
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-
-            if (string.IsNullOrEmpty(userId))
-            {
-                throw new Exception("User ID not found in claims.");
-            }
-
-            Console.WriteLine($"Retrieved User ID: {userId}");
-            return userId;
-        }
-
         public async Task<ApplicationUser> GetByIdAsync(string userId)
         {
             var user = await _userManager.FindByIdAsync(userId);
@@ -61,11 +41,6 @@ namespace ParcelPriceOptimizer.DAL.Repositories
             }
 
             return user;
-        }
-
-        public async Task<IEnumerable<ApplicationUser>> GetAllAsync()
-        {
-            return await _applicationDbContext.ApplicationUsers.ToListAsync();
         }
     }
 }
