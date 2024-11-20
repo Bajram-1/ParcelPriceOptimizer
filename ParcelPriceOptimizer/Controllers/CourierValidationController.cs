@@ -15,8 +15,8 @@ namespace ParcelPriceOptimizer.Controllers
             _courierValidationService = courierValidationService;
         }
 
-        [HttpPost("validforcompany1")]
-        public IActionResult ValidateForCompany1([FromBody] CustomerInputViewModel input)
+        [HttpPost("validforanycompany")]
+        public async Task<IActionResult> ValidateForAnyCompanyAsync([FromBody] CustomerInputViewModel input)
         {
             try
             {
@@ -25,17 +25,17 @@ namespace ParcelPriceOptimizer.Controllers
                     return BadRequest("Invalid package input.");
                 }
 
-                bool isValid = _courierValidationService.IsValidForCompany1(input);
+                bool isValid = await _courierValidationService.IsValidForAnyCompanyAsync(input);
                 return Ok(isValid);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
 
-        [HttpPost("validforcompany2")]
-        public IActionResult ValidateForCompany2([FromBody] CustomerInputViewModel input)
+        [HttpPost("invalidforallcompanies")]
+        public async Task<IActionResult> ValidateForNoCompanyAsync([FromBody] CustomerInputViewModel input)
         {
             try
             {
@@ -44,31 +44,12 @@ namespace ParcelPriceOptimizer.Controllers
                     return BadRequest("Invalid package input.");
                 }
 
-                bool isValid = _courierValidationService.IsValidForCompany2(input);
-                return Ok(isValid);
+                bool isInvalid = await _courierValidationService.IsValidForNoCompanyAsync(input);
+                return Ok(isInvalid);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
-            }
-        }
-
-        [HttpPost("validforcompany3")]
-        public IActionResult ValidateForCompany3([FromBody] CustomerInputViewModel input)
-        {
-            try
-            {
-                if (input == null)
-                {
-                    return BadRequest("Invalid package input.");
-                }
-
-                bool isValid = _courierValidationService.IsValidForCompany3(input);
-                return Ok(isValid);
-            }
-            catch (Exception)
-            {
-                throw;
+                return StatusCode(500, $"Internal server error: {ex.Message}");
             }
         }
     }
