@@ -25,47 +25,61 @@ namespace ParcelPriceOptimizer.BLL.Services
         }
 
         public string GenerateJwtToken(ApplicationUser user) 
-        { 
-            var claims = new List<Claim> 
-            { 
-                new Claim(JwtRegisteredClaimNames.Sub, user.Id), 
-                new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()), 
-                new Claim(ClaimTypes.NameIdentifier, user.Id) 
-            }; 
-            
-            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"])); 
-            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256); 
-            var token = new JwtSecurityToken(issuer: _configuration["JwtSettings:Issuer"], 
-                audience: _configuration["JwtSettings:Audience"], 
-                claims: claims, 
-                expires: DateTime.Now.AddMinutes(30), 
-                signingCredentials: creds); 
-            return new JwtSecurityTokenHandler().WriteToken(token); 
+        {
+            try
+            {
+                var claims = new List<Claim>
+                {
+                    new Claim(JwtRegisteredClaimNames.Sub, user.Id),
+                    new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                    new Claim(ClaimTypes.NameIdentifier, user.Id)
+                };
+
+                var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]));
+                var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+                var token = new JwtSecurityToken(issuer: _configuration["JwtSettings:Issuer"],
+                                                 audience: _configuration["JwtSettings:Audience"],
+                                                 claims: claims,
+                                                 expires: DateTime.Now.AddMinutes(30),
+                                                 signingCredentials: creds);
+                return new JwtSecurityTokenHandler().WriteToken(token);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
 
         public ClaimsPrincipal GetPrincipalFromExpiredToken(string token)
         {
-            var tokenValidationParameters = new TokenValidationParameters
+            try
             {
-                ValidateIssuer = true,
-                ValidateAudience = true,
-                ValidateLifetime = false, 
-                ValidateIssuerSigningKey = true, 
-                ValidIssuer = _configuration["JwtSettings:Issuer"], 
-                ValidAudience = _configuration["JwtSettings:Audience"], 
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"])) 
-            }; 
-            
-            var tokenHandler = new JwtSecurityTokenHandler(); 
-            SecurityToken securityToken; 
-            var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken); 
-            var jwtSecurityToken = securityToken as JwtSecurityToken; 
-            
-            if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase)) 
-            { 
-                throw new SecurityTokenException("Invalid token"); 
-            } 
-            return principal; 
+                var tokenValidationParameters = new TokenValidationParameters
+                {
+                    ValidateIssuer = true,
+                    ValidateAudience = true,
+                    ValidateLifetime = false,
+                    ValidateIssuerSigningKey = true,
+                    ValidIssuer = _configuration["JwtSettings:Issuer"],
+                    ValidAudience = _configuration["JwtSettings:Audience"],
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["JwtSettings:Secret"]))
+                };
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                SecurityToken securityToken;
+                var principal = tokenHandler.ValidateToken(token, tokenValidationParameters, out securityToken);
+                var jwtSecurityToken = securityToken as JwtSecurityToken;
+
+                if (jwtSecurityToken == null || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    throw new SecurityTokenException("Invalid token");
+                }
+                return principal;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         } 
     }
 }

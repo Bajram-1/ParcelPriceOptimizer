@@ -29,34 +29,42 @@ namespace ParcelPriceOptimizer.BLL.Services
 
         public async Task SaveCustomerInputAsync(CustomerInputViewModel input, decimal price)
         {
-            var userId = _userService.GetCurrentUserId();
-
-            if (string.IsNullOrWhiteSpace(userId))
+            try
             {
-                throw new ArgumentException("User ID cannot be null or empty.");
+                var userId = _userService.GetCurrentUserId();
+
+                if (string.IsNullOrWhiteSpace(userId))
+                {
+                    throw new ArgumentException("User ID cannot be null or empty.");
+                }
+
+                var user = await _userRepository.GetByIdAsync(userId);
+
+                if (user == null)
+                {
+                    throw new KeyNotFoundException($"User with ID {userId} not found.");
+                }
+
+                var customerInput = new CustomerInput
+                {
+                    UserId = user.Id,
+                    Width = input.Width,
+                    Height = input.Height,
+                    Depth = input.Depth,
+                    Weight = input.Weight,
+                    Price = price,
+                    SubmittedAt = DateTime.Now,
+                    StripeSessionId = null,
+                    StripePaymentIntentId = null
+                };
+
+                await _repository.AddAsync(customerInput);
             }
-
-            var user = await _userRepository.GetByIdAsync(userId);
-
-            if (user == null)
+            catch (Exception)
             {
-                throw new KeyNotFoundException($"User with ID {userId} not found.");
+
+                throw;
             }
-
-            var customerInput = new CustomerInput
-            {
-                UserId = user.Id,
-                Width = input.Width,
-                Height = input.Height,
-                Depth = input.Depth,
-                Weight = input.Weight,
-                Price = price,
-                SubmittedAt = DateTime.Now,
-                StripeSessionId = null, 
-                StripePaymentIntentId = null
-            };
-
-            await _repository.AddAsync(customerInput);
         }
     }
 }

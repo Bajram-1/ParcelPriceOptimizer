@@ -20,22 +20,29 @@ namespace ParcelPriceOptimizer.BLL.Services
 
         public string GetCurrentUserId()
         {
-            var claims = _httpContextAccessor.HttpContext.User.Claims;
-
-            foreach (var claim in claims)
+            try
             {
-                Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+                var claims = _httpContextAccessor.HttpContext.User.Claims;
+
+                foreach (var claim in claims)
+                {
+                    Console.WriteLine($"Claim Type: {claim.Type}, Claim Value: {claim.Value}");
+                }
+
+                var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                             ?? _httpContextAccessor.HttpContext.User.FindFirst("sub")?.Value;
+
+                if (string.IsNullOrEmpty(userId))
+                {
+                    throw new Exception("User ID claim not found.");
+                }
+
+                return userId;
             }
-
-            var userId = _httpContextAccessor.HttpContext.User.FindFirst(ClaimTypes.NameIdentifier)?.Value
-                         ?? _httpContextAccessor.HttpContext.User.FindFirst("sub")?.Value;
-
-            if (string.IsNullOrEmpty(userId))
+            catch (Exception)
             {
-                throw new Exception("User ID claim not found.");
+                throw;
             }
-
-            return userId;
         }
     }
 }
