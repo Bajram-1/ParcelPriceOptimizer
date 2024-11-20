@@ -19,16 +19,14 @@ namespace ParcelPriceOptimizer.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IConfiguration _configuration;
         private readonly ILogger<ApplicationUser> _logger;
         private readonly IEmailSender _emailSender;
         private readonly ITokenService _tokenService;
 
-        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IConfiguration configuration, ILogger<ApplicationUser> logger, IEmailSender emailSender, ITokenService tokenService)
+        public AuthController(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, ILogger<ApplicationUser> logger, IEmailSender emailSender, ITokenService tokenService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
-            _configuration = configuration;
             _logger = logger;
             _emailSender = emailSender;
             _tokenService = tokenService;
