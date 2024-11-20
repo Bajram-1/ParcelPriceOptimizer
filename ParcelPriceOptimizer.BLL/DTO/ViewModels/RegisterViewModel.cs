@@ -25,10 +25,12 @@ namespace ParcelPriceOptimizer.BLL.DTO.ViewModels
 
         [Required(ErrorMessage = "First Name is required")]
         [StringLength(50)]
+        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "First Name must only contain letters and no spaces.")]
         public string FirstName { get; set; }
 
         [Required(ErrorMessage = "Last Name is required")]
         [StringLength(50)]
+        [RegularExpression(@"^[a-zA-Z]+$", ErrorMessage = "Last Name must only contain letters and no spaces.")]
         public string LastName { get; set; }
     }
 }
