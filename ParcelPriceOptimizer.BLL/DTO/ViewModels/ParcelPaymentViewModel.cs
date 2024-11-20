@@ -8,7 +8,6 @@ namespace ParcelPriceOptimizer.BLL.DTO.ViewModels
 {
     public class ParcelPaymentViewModel
     {
-        public int Id { get; set; }
         public decimal Price { get; set; }
         public int Width { get; set; } 
         public int Height { get; set; } 
