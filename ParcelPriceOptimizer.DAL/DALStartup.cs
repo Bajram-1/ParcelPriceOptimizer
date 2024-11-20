@@ -20,6 +20,7 @@ namespace ParcelPriceOptimizer.DAL
                 options.UseSqlServer(configuration.GetConnectionString("DefaultConnection"));
             });
 
+            services.AddScoped<ICourierPriceRulingRepository, CourierPriceRulingRepository>();
             services.AddScoped<ICustomerInputRepository, CustomerInputRepository>();
             services.AddScoped<IUserRepository, UserRepository>();
         }
