@@ -66,6 +66,11 @@ namespace ParcelPriceOptimizer.Controllers
 
                 input.UserId = userId;
 
+                if (string.IsNullOrEmpty(input.Courier) || input.Price <= 0)
+                {
+                    return BadRequest("Courier and price must be provided.");
+                }
+
                 var domain = $"{Request.Scheme}://{Request.Host.Value}/";
                 var paymentUrl = await _paymentService.CreateStripeSessionAsync(input, domain, userId);
                 return Ok(new { url = paymentUrl });
