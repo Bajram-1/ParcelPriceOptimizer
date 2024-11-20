@@ -10,6 +10,5 @@ namespace ParcelPriceOptimizer.BLL.IServices
     public interface IPaymentService
     {
         Task<string> CreateStripeSessionAsync(ParcelPaymentViewModel input, string domain, string userId);
-        Task UpdateStripePaymentID(int customerInputId, string sessionId, string paymentIntentId, bool isPaymentSuccessful);
     }
 }
