@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using ParcelPriceOptimizer.BLL.DTO.ViewModels;
 using ParcelPriceOptimizer.BLL.IServices;
+using System.Globalization;
 
 namespace ParcelPriceOptimizer.Controllers
 {
@@ -41,16 +42,25 @@ namespace ParcelPriceOptimizer.Controllers
                 }
 
                 input.UserId = userId;
+                var companyPrices = await _priceCalculationService.CalculatePriceAsync(input);
+                var result = companyPrices.Select(c => new
+                {
+                    Courier = c.Key,
+                    Price = c.Value.ToString("C2", CultureInfo.CreateSpecificCulture("en-US"))
+                }).ToList();
 
-                decimal price = _priceCalculationService.CalculatePrice(input);
-                await _customerInputService.SaveCustomerInputAsync(input, price);
-                _logger.LogInformation("Price calculated successfully: {Price}", price);
-                return Ok(new { price });
+                if (result.Any())
+                {
+                    return Ok(result);
+                }
+
+                _logger.LogError("No pricing data found.");
+                return NotFound("No pricing data available.");
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-
-                throw;
+                _logger.LogError($"An error occurred while calculating the price: {ex.Message}");
+                return StatusCode(500, "Internal server error");
             }
         }
     }
