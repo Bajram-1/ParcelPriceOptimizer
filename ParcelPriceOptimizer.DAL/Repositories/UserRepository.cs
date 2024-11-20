@@ -33,14 +33,21 @@ namespace ParcelPriceOptimizer.DAL.Repositories
 
         public async Task<ApplicationUser> GetByIdAsync(string userId)
         {
-            var user = await _userManager.FindByIdAsync(userId);
-
-            if (user == null)
+            try
             {
-                _logger.LogWarning($"User not found with ID: {userId}");
-            }
+                var user = await _userManager.FindByIdAsync(userId);
 
-            return user;
+                if (user == null)
+                {
+                    _logger.LogWarning($"User not found with ID: {userId}");
+                }
+
+                return user;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
         }
     }
 }
