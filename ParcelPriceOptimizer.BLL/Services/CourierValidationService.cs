@@ -6,24 +6,29 @@ namespace ParcelPriceOptimizer.BLL.Services
 {
     public class CourierValidationService : ICourierValidationService
     {
-        public bool IsValidForCompany1(CustomerInputViewModel input)
+        private readonly ICourierPriceRulingRepository _repository;
+
+        public CourierValidationService(ICourierPriceRulingRepository repository)
         {
-            return input.Weight <= 20 && input.Weight > 0 && input.Volume <= 2000;
+            _repository = repository;
         }
 
-        public bool IsValidForCompany2(CustomerInputViewModel input)
+        public async Task<bool> IsValidForAnyCompanyAsync(CustomerInputViewModel input)
         {
-            return input.Weight > 10 && input.Weight <= 30 && input.Volume <= 1700;
+            var rules = await _repository.GetPricingRulesAsync();
+
+            return rules.Any(rule =>
+                input.Volume >= rule.MinVolume && input.Volume <= rule.MaxVolume &&
+                input.Weight >= rule.MinWeight && input.Weight <= rule.MaxWeight);
         }
 
-        public bool IsValidForCompany3(CustomerInputViewModel input)
+        public async Task<bool> IsValidForNoCompanyAsync(CustomerInputViewModel input)
         {
-            return input.Weight >= 10 && input.Volume >= 500;
-        }
+            var rules = await _repository.GetPricingRulesAsync();
 
-        public bool IsValidForAnyCompany(CustomerInputViewModel input) 
-        { 
-            return IsValidForCompany1(input) || IsValidForCompany2(input) || IsValidForCompany3(input); 
+            return !rules.Any(rule =>
+                input.Volume >= rule.MinVolume && input.Volume <= rule.MaxVolume &&
+                input.Weight >= rule.MinWeight && input.Weight <= rule.MaxWeight);
         }
     }
 }

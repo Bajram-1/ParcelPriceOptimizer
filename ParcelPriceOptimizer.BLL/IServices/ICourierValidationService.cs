@@ -4,9 +4,7 @@ namespace ParcelPriceOptimizer.BLL.IServices
 {
     public interface ICourierValidationService
     {
-        bool IsValidForCompany1(CustomerInputViewModel input);
-        bool IsValidForCompany2(CustomerInputViewModel input);
-        bool IsValidForCompany3(CustomerInputViewModel input);
-        bool IsValidForAnyCompany(CustomerInputViewModel input);
+        Task<bool> IsValidForAnyCompanyAsync(CustomerInputViewModel input);
+        Task<bool> IsValidForNoCompanyAsync(CustomerInputViewModel input);
     }
 }
