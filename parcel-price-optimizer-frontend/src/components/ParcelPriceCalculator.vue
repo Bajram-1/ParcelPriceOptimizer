@@ -107,7 +107,7 @@ export default {
             try {
                 const response = await axios.post('/api/auth/refresh', { token });
                 if (response.data && response.data.newToken) {
-                    localStorage.setItem('token', response.data.newToken); // store the new token
+                    localStorage.setItem('token', response.data.newToken);
                     console.log('Token refreshed successfully');
 
                     const decodedToken = JSON.parse(atob(response.data.newToken.split('.')[1]));

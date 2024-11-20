@@ -13,17 +13,15 @@ namespace ParcelPriceOptimizer.Controllers
     {
         private readonly ILogger<PaymentController> _logger;
         private readonly IConfiguration _configuration;
-        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IPaymentService _paymentService;
         private readonly IUserService _userService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
 
-        public PaymentController(ILogger<PaymentController> logger, IConfiguration configuration, UserManager<ApplicationUser> userManager, IPaymentService paymentService, IUserService userService, IHttpContextAccessor httpContextAccessor)
+        public PaymentController(ILogger<PaymentController> logger, IConfiguration configuration, IPaymentService paymentService, IUserService userService, IHttpContextAccessor httpContextAccessor)
         {
             _logger = logger;
             _configuration = configuration;
-            _userManager = userManager;
             _paymentService = paymentService;
             _userService = userService;
             _httpContextAccessor = httpContextAccessor;
